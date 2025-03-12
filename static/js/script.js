@@ -154,9 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const checkbox = this.querySelector('input[type="checkbox"]');
                         const genreId = parseInt(this.dataset.id);
                         
-                        if (e.target !== checkbox) {
-                            checkbox.checked = !checkbox.checked;
-                        }
+                        checkbox.checked = !checkbox.checked; // Toggle checkbox state
                         
                         if (checkbox.checked) {
                             if (!selectedGenres.includes(genreId)) {
