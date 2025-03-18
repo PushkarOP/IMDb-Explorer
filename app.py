@@ -9,7 +9,7 @@ load_dotenv()
 app = Flask(__name__)
 
 # Get API key from environment variables
-API_KEY = "afdedf165ae83c0b4bab280a28d5902c"
+API_KEY = os.environ.get('API_KEY', "afdedf165ae83c0b4bab280a28d5902c")
 BASE_URL = "https://api.themoviedb.org/3"  # Using TMDB API as it's more accessible than IMDb API
 
 @app.route('/')

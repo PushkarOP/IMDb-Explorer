@@ -962,7 +962,7 @@ footer i.fa-heart {
     position: relative;
     width: 100%;
     padding-bottom: 56.25%; /* 16:9 aspect ratio */
-    margin: 20px auto; /* Changed from 20px 0 to center it */
+    margin: 20px auto 30px; /* Increased bottom margin */
     overflow: hidden;
     max-width: 900px; /* prevents it from being too large on big screens */
 }
@@ -985,13 +985,13 @@ iframe[src*="youtube"] {
     aspect-ratio: 16/9 !important;
     border-radius: 12px !important;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
-    margin: 15px auto !important; /* Changed from 15px 0 to center it */
+    margin: 15px auto 25px !important; /* Increased bottom margin */
     display: block !important; /* Added to ensure centering works */
 }
 
 /* Make the trailer section nicer */
 .detail-section.trailer-section {
-    margin: 40px 30px;
+    margin: 40px 30px 50px; /* Increased bottom margin */
     display: flex;
     flex-direction: column;
     align-items: center; /* This already centers child elements */
@@ -1058,5 +1058,278 @@ iframe[src*="youtube"] {
 @media (max-width: 768px) {
     .search-box {
         max-width: 100%;
+    }
+}
+
+/* Watchlist Button in Header */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.watchlist-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(30, 30, 46, 0.95);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 30px;
+    padding: 12px 22px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition-normal);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.watchlist-btn:hover {
+    background-color: #2a2a3a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.watchlist-count {
+    background-color: var(--accent);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Watchlist Modal */
+.watchlist-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.3s;
+}
+
+.modal-header {
+    padding: 25px 30px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.8rem;
+}
+
+.modal-header h2 i {
+    color: var(--accent);
+}
+
+/* Watchlist Content */
+.watchlist-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 20px;
+}
+
+.watchlist-count-info {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.clear-watchlist {
+    background-color: rgba(255, 75, 75, 0.2);
+    color: #ff4b4b;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.clear-watchlist:hover {
+    background-color: rgba(255, 75, 75, 0.3);
+    transform: translateY(-2px);
+}
+
+.watchlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+    padding: 0 30px 30px;
+}
+
+.watchlist-item {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    transition: var(--transition-normal);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    animation: fadeIn 0.5s;
+}
+
+.watchlist-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.watchlist-poster {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.watchlist-item-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.watchlist-poster:hover .watchlist-item-actions {
+    opacity: 1;
+}
+
+.watchlist-item-actions button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.view-details-btn:hover {
+    background-color: var(--accent);
+    transform: scale(1.1);
+}
+
+.remove-watchlist-btn:hover {
+    background-color: #ff4b4b;
+    transform: scale(1.1);
+}
+
+.watchlist-item-info {
+    padding: 15px;
+}
+
+.watchlist-item-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.watchlist-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.watchlist-item-rating i {
+    color: var(--rating-color);
+}
+
+.watchlist-item.removing {
+    transform: scale(0.9);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.empty-watchlist {
+    text-align: center;
+    padding: 50px 0;
+    color: var(--text-secondary);
+}
+
+.empty-watchlist i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-watchlist p {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    opacity: 0.8;
+}
+
+/* Add to Watchlist Button */
+.detail-btn.add-to-watchlist {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.detail-btn.add-to-watchlist:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.detail-btn.add-to-watchlist.in-watchlist {
+    background: var(--accent-gradient);
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .watchlist-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .watchlist-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .watchlist-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
     }
 }

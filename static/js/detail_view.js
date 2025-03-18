@@ -78,12 +78,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderDetailView(data, type) {
         // Format release date or first air date
         let releaseDate = '';
+        let releaseYear = '';
         if (type === 'movie' && data.release_date) {
             const date = new Date(data.release_date);
             releaseDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            releaseYear = date.getFullYear();
         } else if (type === 'tv' && data.first_air_date) {
             const date = new Date(data.first_air_date);
             releaseDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            releaseYear = date.getFullYear();
         }
         
         // Get backdrop and poster paths
@@ -144,6 +147,12 @@ document.addEventListener('DOMContentLoaded', function() {
             trailerKey = officialTrailer?.key || anyTrailer?.key || anyVideo?.key;
         }
         
+        // Check if item is in watchlist
+        const isInWatchlist = window.isInWatchlist ? window.isInWatchlist(data.id, type) : false;
+        const watchlistBtnClass = isInWatchlist ? 'in-watchlist' : '';
+        const watchlistBtnIcon = isInWatchlist ? 'fa-bookmark' : 'fa-bookmark';
+        const watchlistBtnText = isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist';
+        
         // Create main content
         modalContent.innerHTML = `
             <div class="detail-header" style="background-image: url('${backdropPath}')"></div>
@@ -171,8 +180,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <i class="fas fa-play"></i> No Trailer Available
                             </button>`
                         }
-                        <button class="detail-btn">
-                            <i class="fas fa-bookmark"></i> Add to Watchlist
+                        <button class="detail-btn add-to-watchlist ${watchlistBtnClass}" id="addToWatchlistBtn">
+                            <i class="fas ${watchlistBtnIcon}"></i> ${watchlistBtnText}
                         </button>
                     </div>
                 </div>
@@ -226,6 +235,34 @@ document.addEventListener('DOMContentLoaded', function() {
                     trailerContainer.innerHTML = '';
                     trailerBtn.innerHTML = '<i class="fas fa-play"></i> Watch Trailer';
                 });
+            });
+        }
+        
+        // Add to watchlist button functionality
+        const addToWatchlistBtn = document.getElementById('addToWatchlistBtn');
+        if (addToWatchlistBtn && window.addToWatchlist) {
+            addToWatchlistBtn.addEventListener('click', function() {
+                const title = data.title || data.name;
+                const added = window.addToWatchlist(
+                    data.id, 
+                    type, 
+                    title, 
+                    data.poster_path, 
+                    data.vote_average ? data.vote_average.toFixed(1) : 'N/A', 
+                    releaseYear
+                );
+                
+                if (added) {
+                    // Was added to watchlist
+                    this.classList.add('in-watchlist');
+                    this.innerHTML = '<i class="fas fa-bookmark"></i> Remove from Watchlist';
+                    window.notyf.success(`Added "${title}" to your watchlist`);
+                } else {
+                    // Was removed from watchlist
+                    this.classList.remove('in-watchlist');
+                    this.innerHTML = '<i class="fas fa-bookmark"></i> Add to Watchlist';
+                    window.notyf.success(`Removed "${title}" from your watchlist`);
+                }
             });
         }
         
