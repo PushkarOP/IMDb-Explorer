@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPage = 1;
     let totalPages = 0;
     let selectedGenres = [];
-    let selectedRating = 0;
+    let selectedRating = 5;  // Changed from 0 to 5
     let selectedYear = 0;  // Default to 0 (All years)
-    let selectedVoteCount = 0; // Default to 0 (No minimum vote count)
+    let selectedVoteCount = 500; // Changed from 0 to 500
     let sortMethod = 'popularity.desc'; // Default sort method (Popular)
     let mediaType = 'movie'; // Default media type
     let searchQuery = '';   // For search functionality
@@ -172,27 +172,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Initialize the application
+    // Set default values for sliders on page load
+    ratingRange.value = 5;  // Set rating slider to 5
+    ratingValue.textContent = '5';  // Update rating display
+    voteCountRange.value = 500;  // Set vote count slider to 500
+    voteCountValue.textContent = '500';  // Update vote count display
+    
     fetchGenres();
     fetchResults();
+    updateActiveFilters(); // Make sure active filters are shown on initial load
 
     // Functions
     function resetFilters() {
         // Reset all filters to default values
         selectedGenres = [];
-        selectedRating = 0;
+        selectedRating = 5;  // Changed from 0 to 5
         selectedYear = 0;
-        selectedVoteCount = 0;  // Reset vote count
+        selectedVoteCount = 500;  // Changed from 0 to 500
         sortMethod = 'popularity.desc';
         searchQuery = '';
         searchInput.value = '';
         
         // Reset UI elements
-        ratingRange.value = 0;
-        ratingValue.textContent = '0';
+        ratingRange.value = 5;  // Changed from 0 to 5
+        ratingValue.textContent = '5';  // Changed from '0' to '5'
         yearRange.value = 1900;
         yearValue.textContent = 'All';
-        voteCountRange.value = 0;  // Reset vote count range
-        voteCountValue.textContent = '0';  // Reset vote count display
+        voteCountRange.value = 500;  // Changed from 0 to 500
+        voteCountValue.textContent = '500';  // Changed from '0' to '500'
         popularBtn.classList.add('active');
         topRatedBtn.classList.remove('active');
         
@@ -626,7 +633,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Add year filter
+        // Add year filter if set
         if (selectedYear > 1900) {
             filtersHTML += `
                 <div class="active-filter year" data-type="year">
@@ -637,29 +644,25 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
         
-        // Add rating filter
-        if (selectedRating > 0) {
-            filtersHTML += `
-                <div class="active-filter rating" data-type="rating">
-                    <i class="fas fa-star"></i>
-                    <span>${selectedRating}+ Rating</span>
-                    <i class="fas fa-times remove"></i>
-                </div>
-            `;
-        }
+        // Always add rating filter (even with default value)
+        filtersHTML += `
+            <div class="active-filter rating" data-type="rating">
+                <i class="fas fa-star"></i>
+                <span>${selectedRating}+ Rating</span>
+                <i class="fas fa-times remove"></i>
+            </div>
+        `;
         
-        // Add vote count filter
-        if (selectedVoteCount > 0) {
-            filtersHTML += `
-                <div class="active-filter vote-count" data-type="vote-count">
-                    <i class="fas fa-users"></i>
-                    <span>${selectedVoteCount}+ Votes</span>
-                    <i class="fas fa-times remove"></i>
-                </div>
-            `;
-        }
+        // Always add vote count filter (even with default value)
+        filtersHTML += `
+            <div class="active-filter vote-count" data-type="vote-count">
+                <i class="fas fa-users"></i>
+                <span>${selectedVoteCount}+ Votes</span>
+                <i class="fas fa-times remove"></i>
+            </div>
+        `;
         
-        // Add sort filter
+        // Always add sort filter
         if (sortMethod === 'popularity.desc') {
             filtersHTML += `
                 <div class="active-filter sort" data-type="sort" data-method="popularity.desc">
@@ -709,17 +712,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         });
                     } else if (filterType === 'rating') {
-                        selectedRating = 0;
-                        ratingRange.value = 0;
-                        ratingValue.textContent = '0';
+                        selectedRating = 5;  // Reset to default of 5
+                        ratingRange.value = 5;
+                        ratingValue.textContent = '5';
                     } else if (filterType === 'year') {
                         selectedYear = 0;
                         yearRange.value = 1900;
                         yearValue.textContent = 'All';
                     } else if (filterType === 'vote-count') {
-                        selectedVoteCount = 0;
-                        voteCountRange.value = 0;
-                        voteCountValue.textContent = '0';
+                        selectedVoteCount = 500;  // Reset to default of 500
+                        voteCountRange.value = 500;
+                        voteCountValue.textContent = '500';
                     } else if (filterType === 'search') {
                         searchQuery = '';
                         searchInput.value = '';

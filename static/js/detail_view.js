@@ -180,6 +180,44 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <i class="fas fa-play"></i> No Trailer Available
                             </button>`
                         }
+                        <div class="watch-dropdown">
+                            <button class="detail-btn watch-now" id="watchNowBtn">
+                                <i class="fas fa-tv"></i> Watch
+                            </button>
+                            <div class="watch-options" id="watchOptions">
+                                <div class="watch-options-header">Watch on:</div>
+                                <div class="watch-options-list">
+                                    <a href="${type === 'movie' ? 
+                                        `https://www.cineby.app/movie/${data.id}` : 
+                                        `https://www.cineby.app/tv/${data.id}`}" 
+                                       target="_blank" class="watch-option">
+                                        <img src="/static/img/cineby.png" alt="Cineby">
+                                        <span>Cineby</span>
+                                    </a>
+                                    <a href="${type === 'movie' ? 
+                                        `https://www.bitcine.app/movie/${data.id}` : 
+                                        `https://www.bitcine.app/tv/${data.id}`}" 
+                                       target="_blank" class="watch-option">
+                                        <img src="/static/img/bitcine.png" alt="Bitcine">
+                                        <span>Bitcine</span>
+                                    </a>
+                                    <a href="${type === 'movie' ? 
+                                        `https://www.1shows.com/movie/${data.id}` : 
+                                        `https://www.1shows.com/tv/${data.id}`}" 
+                                       target="_blank" class="watch-option">
+                                        <img src="/static/img/1shows.png" alt="1shows">
+                                        <span>1shows</span>
+                                    </a>
+                                    <a href="${type === 'movie' ? 
+                                        `https://watch.autoembed.cc/movie/${data.id}` : 
+                                        `https://watch.autoembed.cc/tv/${data.id}`}" 
+                                       target="_blank" class="watch-option">
+                                        <img src="/static/img/autoembed.png" alt="Autoembed">
+                                        <span>Autoembed</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                         <button class="detail-btn add-to-watchlist ${watchlistBtnClass}" id="addToWatchlistBtn">
                             <i class="fas ${watchlistBtnIcon}"></i> ${watchlistBtnText}
                         </button>
@@ -235,6 +273,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     trailerContainer.innerHTML = '';
                     trailerBtn.innerHTML = '<i class="fas fa-play"></i> Watch Trailer';
                 });
+            });
+        }
+        
+        // Add Watch Now dropdown functionality
+        const watchBtn = document.getElementById('watchNowBtn');
+        const watchOptions = document.getElementById('watchOptions');
+        
+        if (watchBtn) {
+            watchBtn.addEventListener('click', function(event) {
+                event.stopPropagation(); // Prevent bubbling to document click handler
+                watchOptions.classList.toggle('active');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.watch-dropdown')) {
+                    watchOptions.classList.remove('active');
+                }
             });
         }
         
