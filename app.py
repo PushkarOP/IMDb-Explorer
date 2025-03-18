@@ -48,6 +48,14 @@ def discover():
         'include_adult': 'false'
     }
     
+    # Handle year filter - different param names for movies vs TV shows
+    year = request.args.get('primary_release_year' if media_type == 'movie' else 'first_air_date_year', '')
+    if year and year != '1900':
+        if media_type == 'movie':
+            params['primary_release_year'] = year
+        else:
+            params['first_air_date_year'] = year
+    
     if genre:
         params['with_genres'] = genre
     
@@ -58,6 +66,29 @@ def discover():
         return jsonify(response.json())
     else:
         return jsonify({"error": "Failed to fetch data"}), 500
+
+@app.route('/api/search', methods=['GET'])
+def search():
+    query = request.args.get('query', '')
+    media_type = request.args.get('type', 'movie')  # Default to movie
+    page = request.args.get('page', '1')
+    
+    if not query:
+        return jsonify({"error": "No search query provided"}), 400
+    
+    url = f"{BASE_URL}/search/{media_type}"
+    response = requests.get(url, params={
+        'api_key': API_KEY,
+        'language': 'en-US',
+        'query': query,
+        'page': page,
+        'include_adult': 'false'
+    })
+    
+    if response.status_code == 200:
+        return jsonify(response.json())
+    else:
+        return jsonify({"error": f"Failed to search. Status: {response.status_code}"}), 500
 
 @app.route('/api/top_rated', methods=['GET'])
 def top_rated():
@@ -100,29 +131,6 @@ def get_detail():
         return jsonify(response.json())
     else:
         return jsonify({"error": f"Failed to fetch details. Status: {response.status_code}"}), 500
-    
-@app.route('/api/search', methods=['GET'])
-def search():
-    query = request.args.get('query', '')
-    media_type = request.args.get('type', 'movie')  # Default to movie
-    page = request.args.get('page', '1')
-    
-    if not query:
-        return jsonify({"error": "No search query provided"}), 400
-    
-    url = f"{BASE_URL}/search/{media_type}"
-    response = requests.get(url, params={
-        'api_key': API_KEY,
-        'language': 'en-US',
-        'query': query,
-        'page': page,
-        'include_adult': 'false'
-    })
-    
-    if response.status_code == 200:
-        return jsonify(response.json())
-    else:
-        return jsonify({"error": f"Failed to search. Status: {response.status_code}"}), 500
 
 @app.route('/api/popular', methods=['GET'])
 def popular():

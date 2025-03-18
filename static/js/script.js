@@ -4,8 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalPages = 0;
     let selectedGenres = [];
     let selectedRating = 0;
+    let selectedYear = 0;  // Default to 0 (All years)
     let sortMethod = 'popularity.desc'; // Default sort method (Popular)
     let mediaType = 'movie'; // Default media type
+    let searchQuery = '';   // For search functionality
 
     // Elements
     const moviesToggle = document.getElementById('moviesToggle');
@@ -16,12 +18,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const ratingSlider = document.getElementById('ratingSlider');
     const ratingRange = document.getElementById('ratingRange');
     const ratingValue = document.getElementById('ratingValue');
+    const yearBtn = document.getElementById('yearBtn');
+    const yearSlider = document.getElementById('yearSlider');
+    const yearRange = document.getElementById('yearRange');
+    const yearValue = document.getElementById('yearValue');
     const popularBtn = document.getElementById('popularBtn');
     const topRatedBtn = document.getElementById('topRatedBtn');
     const activeFilters = document.getElementById('activeFilters');
     const loadingContainer = document.getElementById('loadingContainer');
     const resultsContainer = document.getElementById('results');
     const pagination = document.getElementById('pagination');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
 
     // Initialize Notyf (for notifications)
     const notyf = new Notyf({
@@ -57,11 +65,27 @@ document.addEventListener('DOMContentLoaded', function() {
     genreBtn.addEventListener('click', () => {
         genreDropdown.classList.toggle('show');
         ratingSlider.classList.remove('show');
+        yearSlider.classList.remove('show');
     });
 
     ratingBtn.addEventListener('click', () => {
         ratingSlider.classList.toggle('show');
         genreDropdown.classList.remove('show');
+        yearSlider.classList.remove('show');
+    });
+
+    // Year filter event listeners
+    yearBtn.addEventListener('click', () => {
+        yearSlider.classList.toggle('show');
+        genreDropdown.classList.remove('show');
+        ratingSlider.classList.remove('show');
+    });
+
+    yearRange.addEventListener('input', () => {
+        selectedYear = parseInt(yearRange.value);
+        yearValue.textContent = selectedYear === 1900 ? 'All' : selectedYear;
+        updateActiveFilters();
+        fetchResults();
     });
 
     ratingRange.addEventListener('input', () => {
@@ -87,6 +111,27 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchResults();
     });
 
+    // Search functionality
+    searchBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+
+    function performSearch() {
+        const query = searchInput.value.trim();
+        if (query) {
+            searchQuery = query;
+            // Reset page to 1 when performing a new search
+            currentPage = 1;
+            fetchSearchResults();
+        } else {
+            searchQuery = '';
+            fetchResults();
+        }
+    }
+
     // Close dropdowns when clicking outside
     document.addEventListener('click', function(e) {
         if (!genreBtn.contains(e.target) && !genreDropdown.contains(e.target)) {
@@ -95,6 +140,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!ratingBtn.contains(e.target) && !ratingSlider.contains(e.target)) {
             ratingSlider.classList.remove('show');
         }
+        if (!yearBtn.contains(e.target) && !yearSlider.contains(e.target)) {
+            yearSlider.classList.remove('show');
+        }
     });
 
     // Initialize the application
@@ -102,10 +150,33 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchResults();
 
     // Functions
+    function resetFilters() {
+        // Reset all filters to default values
+        selectedGenres = [];
+        selectedRating = 0;
+        selectedYear = 0;
+        sortMethod = 'popularity.desc';
+        searchQuery = '';
+        searchInput.value = '';
+        
+        // Reset UI elements
+        ratingRange.value = 0;
+        ratingValue.textContent = '0';
+        yearRange.value = 1900;
+        yearValue.textContent = 'All';
+        popularBtn.classList.add('active');
+        topRatedBtn.classList.remove('active');
+        
+        // Reset page
+        currentPage = 1;
+    }
+
     function switchMediaType(type) {
         if (mediaType !== type) {
             mediaType = type;
-            currentPage = 1;
+            
+            // Reset all filters when switching media types
+            resetFilters();
             
             // Update UI for media type toggle
             if (type === 'movie') {
@@ -180,7 +251,49 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+    function fetchSearchResults() {
+        showLoading(true);
+        
+        let params = new URLSearchParams({
+            type: mediaType,
+            page: currentPage,
+            query: searchQuery
+        });
+        
+        fetch(`/api/search?${params}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                totalPages = data.total_pages > 100 ? 100 : data.total_pages;
+                displayResults(data.results);
+                updatePagination();
+                updateActiveFilters();
+                showLoading(false);
+            })
+            .catch(error => {
+                console.error('Error searching:', error);
+                notyf.error('Search failed');
+                showLoading(false);
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Failed to search. Please try again later.</p>
+                    </div>
+                `;
+            });
+    }
+
     function fetchResults() {
+        // If there's a search query, use search endpoint instead
+        if (searchQuery) {
+            fetchSearchResults();
+            return;
+        }
+        
         showLoading(true);
         currentPage = 1;
         
@@ -191,6 +304,12 @@ document.addEventListener('DOMContentLoaded', function() {
             rating: selectedRating,
             sort_by: sortMethod
         });
+        
+        // Add year filter if set
+        if (selectedYear > 1900) {
+            const yearParam = mediaType === 'movie' ? 'primary_release_year' : 'first_air_date_year';
+            params.append(yearParam, selectedYear);
+        }
         
         if (selectedGenres.length > 0) {
             params.append('genre', selectedGenres.join(','));
@@ -226,6 +345,39 @@ document.addEventListener('DOMContentLoaded', function() {
         showLoading(true);
         currentPage = page;
         
+        // If there's a search query, use search endpoint
+        if (searchQuery) {
+            let params = new URLSearchParams({
+                type: mediaType,
+                page: currentPage,
+                query: searchQuery
+            });
+            
+            fetch(`/api/search?${params}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayResults(data.results);
+                    updatePagination();
+                    showLoading(false);
+                    // Scroll to top
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching search results:', error);
+                    notyf.error('Failed to load content');
+                    showLoading(false);
+                });
+            return;
+        }
+        
         let endpoint = '/api/discover';
         let params = new URLSearchParams({
             type: mediaType,
@@ -233,6 +385,12 @@ document.addEventListener('DOMContentLoaded', function() {
             rating: selectedRating,
             sort_by: sortMethod
         });
+        
+        // Add year filter if set
+        if (selectedYear > 1900) {
+            const yearParam = mediaType === 'movie' ? 'primary_release_year' : 'first_air_date_year';
+            params.append(yearParam, selectedYear);
+        }
         
         if (selectedGenres.length > 0) {
             params.append('genre', selectedGenres.join(','));
@@ -412,6 +570,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let filtersHTML = '';
         
+        // Add search filter if present
+        if (searchQuery) {
+            filtersHTML += `
+                <div class="active-filter search" data-type="search">
+                    <i class="fas fa-search"></i>
+                    <span>Search: "${searchQuery}"</span>
+                    <i class="fas fa-times remove"></i>
+                </div>
+            `;
+        }
+        
         // Add genre filters
         if (selectedGenreNames.length > 0) {
             selectedGenreNames.forEach(genreName => {
@@ -423,6 +592,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
             });
+        }
+        
+        // Add year filter
+        if (selectedYear > 1900) {
+            filtersHTML += `
+                <div class="active-filter year" data-type="year">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Year: ${selectedYear}</span>
+                    <i class="fas fa-times remove"></i>
+                </div>
+            `;
         }
         
         // Add rating filter
@@ -489,6 +669,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         selectedRating = 0;
                         ratingRange.value = 0;
                         ratingValue.textContent = '0';
+                    } else if (filterType === 'year') {
+                        selectedYear = 0;
+                        yearRange.value = 1900;
+                        yearValue.textContent = 'All';
+                    } else if (filterType === 'search') {
+                        searchQuery = '';
+                        searchInput.value = '';
                     }
                     
                     updateActiveFilters();

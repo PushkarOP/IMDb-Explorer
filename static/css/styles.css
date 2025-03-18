@@ -955,14 +955,14 @@ footer i.fa-heart {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--text
+    color: var(--text-primary);
+}
 
-/* YouTube Iframe Fix - Important overrides to fix ratio issues */
 .video-container {
     position: relative;
     width: 100%;
     padding-bottom: 56.25%; /* 16:9 aspect ratio */
-    margin: 20px 0;
+    margin: 20px auto; /* Changed from 20px 0 to center it */
     overflow: hidden;
     max-width: 900px; /* prevents it from being too large on big screens */
 }
@@ -985,7 +985,8 @@ iframe[src*="youtube"] {
     aspect-ratio: 16/9 !important;
     border-radius: 12px !important;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
-    margin: 15px 0 !important;
+    margin: 15px auto !important; /* Changed from 15px 0 to center it */
+    display: block !important; /* Added to ensure centering works */
 }
 
 /* Make the trailer section nicer */
@@ -993,5 +994,69 @@ iframe[src*="youtube"] {
     margin: 40px 30px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; /* This already centers child elements */
+}
+
+/* Search Bar Styles */
+.search-container {
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+.search-box {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: rgba(30, 30, 46, 0.8);
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: var(--transition-normal);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.search-box:focus-within {
+    box-shadow: 0 6px 20px rgba(255, 107, 0, 0.2);
+    border: 1px solid rgba(255, 107, 0, 0.3);
+}
+
+#searchInput {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 1rem;
+    outline: none;
+}
+
+#searchInput::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+#searchBtn {
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    padding: 0 25px;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    font-size: 1.1rem;
+}
+
+#searchBtn:hover {
+    filter: brightness(1.1);
+}
+
+/* Filter Styles - Update for Year Filter */
+.active-filter.year {
+    border-left: 3px solid #3f51b5;
+}
+
+@media (max-width: 768px) {
+    .search-box {
+        max-width: 100%;
+    }
 }

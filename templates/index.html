@@ -3,11 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMDb Explorer</title>
-    <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico">
+    <title>IMDb Explorer - Discover Movies and TV Shows</title>
+    <meta name="description" content="Explore and discover the best movies and TV shows with IMDb Explorer. Filter by genre, year, and rating to find your next favorite.">
+    <meta name="keywords" content="movies, TV shows, IMDb, film database, entertainment, ratings, genres">
+    <meta name="author" content="PushkarOP">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://imdb-explorer.example.com/">
+    <meta property="og:title" content="IMDb Explorer - Discover Movies and TV Shows">
+    <meta property="og:description" content="Find and explore the best movies and TV shows filtered by genre, year, and rating.">
+    <meta property="og:image" content="/static/img/icon.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://imdb-explorer.example.com/">
+    <meta property="twitter:title" content="IMDb Explorer - Discover Movies and TV Shows">
+    <meta property="twitter:description" content="Find and explore the best movies and TV shows filtered by genre, year, and rating.">
+    <meta property="twitter:image" content="/static/img/icon.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/static/img/icon.png">
+    <link rel="apple-touch-icon" href="/static/img/icon.png">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "IMDb Explorer",
+      "description": "A web application for discovering and exploring movies and TV shows",
+      "applicationCategory": "Entertainment",
+      "operatingSystem": "Any",
+      "author": {
+        "@type": "Person",
+        "name": "PushkarOP"
+      }
+    }
+    </script>
     
 </head>
 <body>
@@ -22,6 +60,14 @@
             </div>
         </header>
 
+        <!-- Add search bar -->
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search for movies or TV shows...">
+                <button id="searchBtn"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+
         <div class="filters">
             <div class="filter-group">
                 <div class="dropdown">
@@ -32,6 +78,23 @@
                     <div class="dropdown-content" id="genreDropdown">
                         <!-- Genres will be populated here via JavaScript -->
                         <div class="loading">Loading genres...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add year filter -->
+            <div class="filter-group">
+                <button class="filter-btn" id="yearBtn">
+                    <i class="fas fa-calendar-alt"></i> Year
+                    <span id="yearValue">All</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="slider-container" id="yearSlider">
+                    <input type="range" min="1900" max="2025" value="1900" step="1" class="slider" id="yearRange">
+                    <div class="slider-labels">
+                        <span>1900</span>
+                        <span>1960</span>
+                        <span>2025</span>
                     </div>
                 </div>
             </div>
