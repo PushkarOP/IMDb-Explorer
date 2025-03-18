@@ -142,4 +142,5 @@ def popular():
         return jsonify({"error": "Failed to fetch popular"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
