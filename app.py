@@ -57,9 +57,11 @@ def discover():
     year = request.args.get('primary_release_year' if media_type == 'movie' else 'first_air_date_year', '')
     if year and year != '1900':
         if media_type == 'movie':
-            params['primary_release_year'] = year
+            # Change from exact year to minimum year (year and newer)
+            params['primary_release_date.gte'] = f"{year}-01-01"
         else:
-            params['first_air_date_year'] = year
+            # Change from exact year to minimum year (year and newer)
+            params['first_air_date.gte'] = f"{year}-01-01"
     
     if genre:
         params['with_genres'] = genre

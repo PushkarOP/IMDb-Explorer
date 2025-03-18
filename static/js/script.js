@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     yearRange.addEventListener('input', () => {
         selectedYear = parseInt(yearRange.value);
-        yearValue.textContent = selectedYear === 1900 ? 'All' : selectedYear;
+        yearValue.textContent = selectedYear === 1900 ? 'All' : `${selectedYear}+`;
         updateActiveFilters();
         fetchResults();
     });
@@ -631,7 +631,7 @@ document.addEventListener('DOMContentLoaded', function() {
             filtersHTML += `
                 <div class="active-filter year" data-type="year">
                     <i class="fas fa-calendar-alt"></i>
-                    <span>Year: ${selectedYear}</span>
+                    <span>Year: ${selectedYear}+</span>
                     <i class="fas fa-times remove"></i>
                 </div>
             `;
