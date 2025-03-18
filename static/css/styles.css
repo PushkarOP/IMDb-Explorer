@@ -1554,3 +1554,110 @@ iframe[src*="youtube"] {
 .modal-content::-webkit-scrollbar-track {
     background: rgba(16, 16, 24, 0.4);
 }
+
+/* Responsive styles for watch dropdown */
+@media (max-width: 992px) {
+    .watch-dropdown {
+        position: static;
+        /* Make the dropdown container full width on smaller screens */
+        width: 100%;
+    }
+
+    .watch-options {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 320px;
+        /* Center dropdown on smaller screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .watch-options {
+        min-width: 200px;
+        /* Adjust minimum width for tablets */
+    }
+
+    .watch-option {
+        padding: 14px 15px;
+        /* Larger touch target for mobile */
+    }
+    
+    .watch-option img {
+        width: 28px;
+        height: 28px;
+        /* Slightly larger icons for better visibility */
+    }
+}
+
+@media (max-width: 480px) {
+    .watch-dropdown {
+        /* Full width container on mobile */
+        display: block;
+    }
+    
+    .watch-options {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 92%;
+        max-width: none;
+        bottom: 20px;
+        top: auto;
+        /* Position at bottom of screen on mobile for easier thumb access */
+        box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
+        border-radius: 16px;
+        max-height: 60vh;
+        /* Limit height on small screens */
+    }
+    
+    .watch-options-list {
+        max-height: 50vh;
+        /* Adjust maximum height for mobile */
+    }
+    
+    .watch-option {
+        padding: 16px;
+        /* Even larger touch targets for mobile */
+    }
+    
+    .watch-options-header {
+        padding: 14px 16px;
+        text-align: center;
+        font-size: 1rem;
+        /* More prominent header on mobile */
+    }
+    
+    /* Add subtle indicator to show scrollable content */
+    .watch-options:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 30px;
+        background: linear-gradient(to top, rgba(22, 22, 30, 0.8), transparent);
+        pointer-events: none;
+        opacity: 0.6;
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+}
+
+/* Enhanced touch interactions for mobile */
+@media (hover: none) and (pointer: coarse) {
+    .watch-option {
+        transition: background-color 0.2s;
+    }
+    
+    .watch-option:active {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: none;
+        /* Better touch feedback instead of hover */
+    }
+    
+    /* Override hover styles for touch devices */
+    .watch-option:hover {
+        transform: none;
+    }
+}
