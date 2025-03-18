@@ -15,10 +15,6 @@ A web application for discovering and exploring movies and TV shows using the TM
 - 📱 Responsive design for mobile and desktop
 - 🔖 Create and manage your personal watchlist
 
-## Screenshot
-
-![IMDb Explorer Screenshot](/static/img/screenshot.png)
-
 ## Tech Stack
 
 - **Backend:** Flask (Python)
