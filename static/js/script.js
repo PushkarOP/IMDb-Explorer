@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedGenres = [];
     let selectedRating = 0;
     let selectedYear = 0;  // Default to 0 (All years)
+    let selectedVoteCount = 0; // Default to 0 (No minimum vote count)
     let sortMethod = 'popularity.desc'; // Default sort method (Popular)
     let mediaType = 'movie'; // Default media type
     let searchQuery = '';   // For search functionality
@@ -22,6 +23,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const yearSlider = document.getElementById('yearSlider');
     const yearRange = document.getElementById('yearRange');
     const yearValue = document.getElementById('yearValue');
+    const voteCountBtn = document.getElementById('voteCountBtn');  // Vote count button
+    const voteCountSlider = document.getElementById('voteCountSlider');  // Vote count slider container
+    const voteCountRange = document.getElementById('voteCountRange');  // Vote count range input
+    const voteCountValue = document.getElementById('voteCountValue');  // Vote count value display
     const popularBtn = document.getElementById('popularBtn');
     const topRatedBtn = document.getElementById('topRatedBtn');
     const activeFilters = document.getElementById('activeFilters');
@@ -66,12 +71,14 @@ document.addEventListener('DOMContentLoaded', function() {
         genreDropdown.classList.toggle('show');
         ratingSlider.classList.remove('show');
         yearSlider.classList.remove('show');
+        voteCountSlider.classList.remove('show');  // Hide vote count slider
     });
 
     ratingBtn.addEventListener('click', () => {
         ratingSlider.classList.toggle('show');
         genreDropdown.classList.remove('show');
         yearSlider.classList.remove('show');
+        voteCountSlider.classList.remove('show');  // Hide vote count slider
     });
 
     // Year filter event listeners
@@ -79,6 +86,15 @@ document.addEventListener('DOMContentLoaded', function() {
         yearSlider.classList.toggle('show');
         genreDropdown.classList.remove('show');
         ratingSlider.classList.remove('show');
+        voteCountSlider.classList.remove('show');  // Hide vote count slider
+    });
+
+    // Vote count filter event listeners
+    voteCountBtn.addEventListener('click', () => {
+        voteCountSlider.classList.toggle('show');
+        genreDropdown.classList.remove('show');
+        ratingSlider.classList.remove('show');
+        yearSlider.classList.remove('show');
     });
 
     yearRange.addEventListener('input', () => {
@@ -91,6 +107,13 @@ document.addEventListener('DOMContentLoaded', function() {
     ratingRange.addEventListener('input', () => {
         selectedRating = parseFloat(ratingRange.value);
         ratingValue.textContent = selectedRating;
+        updateActiveFilters();
+        fetchResults();
+    });
+
+    voteCountRange.addEventListener('input', () => {
+        selectedVoteCount = parseInt(voteCountRange.value);
+        voteCountValue.textContent = selectedVoteCount === 1000 ? '1000+' : selectedVoteCount;
         updateActiveFilters();
         fetchResults();
     });
@@ -143,6 +166,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!yearBtn.contains(e.target) && !yearSlider.contains(e.target)) {
             yearSlider.classList.remove('show');
         }
+        if (!voteCountBtn.contains(e.target) && !voteCountSlider.contains(e.target)) {
+            voteCountSlider.classList.remove('show');
+        }
     });
 
     // Initialize the application
@@ -155,6 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedGenres = [];
         selectedRating = 0;
         selectedYear = 0;
+        selectedVoteCount = 0;  // Reset vote count
         sortMethod = 'popularity.desc';
         searchQuery = '';
         searchInput.value = '';
@@ -164,6 +191,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ratingValue.textContent = '0';
         yearRange.value = 1900;
         yearValue.textContent = 'All';
+        voteCountRange.value = 0;  // Reset vote count range
+        voteCountValue.textContent = '0';  // Reset vote count display
         popularBtn.classList.add('active');
         topRatedBtn.classList.remove('active');
         
@@ -302,6 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: mediaType,
             page: currentPage,
             rating: selectedRating,
+            vote_count: selectedVoteCount,  // Add vote count parameter
             sort_by: sortMethod
         });
         
@@ -383,6 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: mediaType,
             page: currentPage,
             rating: selectedRating,
+            vote_count: selectedVoteCount,  // Add vote count parameter
             sort_by: sortMethod
         });
         
@@ -473,6 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="movie-rating">
                         <i class="fas fa-star"></i>
                         <span>${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}</span>
+                        <span class="vote-count">(${item.vote_count || 0})</span>
                     </div>
                 </div>
             `;
@@ -616,6 +648,17 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
         
+        // Add vote count filter
+        if (selectedVoteCount > 0) {
+            filtersHTML += `
+                <div class="active-filter vote-count" data-type="vote-count">
+                    <i class="fas fa-users"></i>
+                    <span>${selectedVoteCount}+ Votes</span>
+                    <i class="fas fa-times remove"></i>
+                </div>
+            `;
+        }
+        
         // Add sort filter
         if (sortMethod === 'popularity.desc') {
             filtersHTML += `
@@ -673,6 +716,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         selectedYear = 0;
                         yearRange.value = 1900;
                         yearValue.textContent = 'All';
+                    } else if (filterType === 'vote-count') {
+                        selectedVoteCount = 0;
+                        voteCountRange.value = 0;
+                        voteCountValue.textContent = '0';
                     } else if (filterType === 'search') {
                         searchQuery = '';
                         searchInput.value = '';

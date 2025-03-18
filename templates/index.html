@@ -121,6 +121,23 @@
                 </div>
             </div>
 
+            <!-- Add vote count filter -->
+            <div class="filter-group">
+                <button class="filter-btn" id="voteCountBtn">
+                    <i class="fas fa-users"></i> Vote Count
+                    <span id="voteCountValue">0</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="slider-container" id="voteCountSlider">
+                    <input type="range" min="0" max="1000" value="0" step="50" class="slider" id="voteCountRange">
+                    <div class="slider-labels">
+                        <span>0</span>
+                        <span>500</span>
+                        <span>1000+</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="filter-group">
                 <button class="filter-btn sort-btn" id="popularBtn">
                     <i class="fas fa-fire"></i> Popular

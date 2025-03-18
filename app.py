@@ -36,6 +36,7 @@ def discover():
     media_type = request.args.get('type', 'movie')  # Default to movie
     genre = request.args.get('genre', '')
     rating = request.args.get('rating', '0')
+    vote_count = request.args.get('vote_count', '0')  # Added vote count parameter
     sort_by = request.args.get('sort_by', 'popularity.desc')  # Default to popular
     page = request.args.get('page', '1')
     
@@ -44,9 +45,13 @@ def discover():
         'language': 'en-US',
         'sort_by': sort_by,
         'page': page,
-        'vote_average.gte': rating,
+        'vote_average.gte': float(rating),  # Convert to float for correct comparison
         'include_adult': 'false'
     }
+    
+    # Add vote count parameter if specified
+    if vote_count and int(vote_count) > 0:
+        params['vote_count.gte'] = int(vote_count)
     
     # Handle year filter - different param names for movies vs TV shows
     year = request.args.get('primary_release_year' if media_type == 'movie' else 'first_air_date_year', '')
@@ -63,7 +68,12 @@ def discover():
     response = requests.get(url, params=params)
     
     if response.status_code == 200:
-        return jsonify(response.json())
+        # Additional filtering to ensure rating threshold is met
+        data = response.json()
+        if float(rating) > 0:
+            # Double-check the results to filter out any items below the threshold
+            data['results'] = [item for item in data['results'] if item.get('vote_average', 0) >= float(rating)]
+        return jsonify(data)
     else:
         return jsonify({"error": "Failed to fetch data"}), 500
 
