@@ -202,11 +202,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <span>Bitcine</span>
                                     </a>
                                     <a href="${type === 'movie' ? 
-                                        `https://www.1shows.com/movie/${data.id}` : 
-                                        `https://www.1shows.com/tv/${data.id}`}" 
+                                        `https://rivestream.org/detail?type=movie&id=${data.id}` : 
+                                        `https://rivestream.org/detail?type=tv&id=${data.id}`}" 
                                        target="_blank" class="watch-option">
-                                        <img src="/static/img/1shows.png" alt="1shows">
-                                        <span>1shows</span>
+                                        <img src="/static/img/rive.png" alt="Rive">
+                                        <span>Rive</span>
                                     </a>
                                     <a href="${type === 'movie' ? 
                                         `https://watch.autoembed.cc/movie/${data.id}` : 

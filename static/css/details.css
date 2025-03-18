@@ -1,0 +1,595 @@
+/* Detail View Styling */
+.detail-header {
+    position: relative;
+    height: 450px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg-card);
+}
+
+.detail-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, 
+                rgba(0, 0, 0, 0.2) 0%,
+                rgba(16, 16, 24, 0.8) 80%,
+                var(--bg-secondary) 100%);
+}
+
+.detail-info {
+    position: relative;
+    margin-top: -150px;
+    padding: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.detail-poster {
+    width: 220px;
+    height: 330px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+    margin-right: 20px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-poster:hover {
+    transform: scale(1.03);
+}
+
+.detail-text {
+    flex: 1;
+    min-width: 300px;
+}
+
+.detail-title {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+}
+
+.detail-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.detail-meta i {
+    color: var(--accent);
+}
+
+.detail-genre-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.detail-genre {
+    background: rgba(255, 107, 0, 0.15);
+    color: var(--accent-light);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.detail-genre:hover {
+    background: rgba(255, 107, 0, 0.25);
+    transform: translateY(-2px);
+}
+
+.detail-overview {
+    margin-bottom: 25px;
+    line-height: 1.7;
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.detail-actions {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.detail-btn {
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+}
+
+.detail-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+}
+
+.detail-section {
+    margin: 40px 30px;
+}
+
+.detail-section h3 {
+    margin-bottom: 20px;
+    font-size: 1.6rem;
+    position: relative;
+    display: inline-block;
+}
+
+.detail-section h3:after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60%;
+    height: 3px;
+    background: var(--accent-gradient);
+    border-radius: 2px;
+}
+
+/* Cast Styles - IMPROVED */
+.cast-grid {
+    display: flex;
+    overflow-x: auto;
+    padding: 15px 0;
+    margin-bottom: 20px;
+    gap: 20px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+}
+
+.cast-card {
+    flex: 0 0 auto;
+    width: 180px; /* Increased from 160px */
+    background-color: rgba(30, 30, 44, 0.6);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: var(--transition-normal);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    scroll-snap-align: start;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+}
+
+.cast-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.cast-image {
+    width: 100%;
+    height: 225px; /* Increased from 200px */
+    background-size: cover;
+    background-position: top center;
+    background-color: #262634;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Cast image loading state */
+.cast-image.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.cast-image.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        transparent 100%);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.cast-image.error::after {
+    content: '\f007'; /* Font Awesome user icon */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.cast-info {
+    padding: 15px;
+    background-color: rgba(30, 30, 44, 0.9);
+}
+
+.cast-name {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    margin: 20px auto 30px; /* Increased bottom margin */
+    overflow: hidden;
+    max-width: 900px; /* prevents it from being too large on big screens */
+}
+
+.video-container iframe {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 12px !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+    border: none !important;
+}
+
+/* Direct iframe fix as a fallback */
+iframe[src*="youtube"] {
+    min-width: 300px !important;
+    min-height: 169px !important; /* 16:9 ratio at minimum */
+    aspect-ratio: 16/9 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+    margin: 15px auto 25px !important; /* Increased bottom margin */
+    display: block !important; /* Added to ensure centering works */
+}
+
+/* Make the trailer section nicer */
+.detail-section.trailer-section {
+    margin: 40px 30px 50px; /* Increased bottom margin */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* This already centers child elements */
+}
+
+/* Add to Watchlist Button */
+.detail-btn.add-to-watchlist {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.detail-btn.add-to-watchlist:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.detail-btn.add-to-watchlist.in-watchlist {
+    background: var(--accent-gradient);
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .watchlist-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .watchlist-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .watchlist-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+}
+
+/* Watch dropdown styles */
+.watch-dropdown {
+    position: relative;
+    display: inline-block;
+    z-index: 5; /* Ensure dropdown appears above other elements */
+}
+
+.watch-options {
+    display: none;
+    position: absolute;
+    z-index: 10;
+    background-color: var(--bg-secondary);
+    min-width: 220px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    overflow: hidden;
+    top: calc(100% + 10px);
+    left: 0;
+    margin-top: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    animation: fadeInUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.watch-options.active {
+    display: block;
+}
+
+.watch-options-header {
+    padding: 12px 15px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: rgba(22, 22, 30, 0.6);
+}
+
+.watch-options-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.watch-option {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.watch-option:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    transform: translateX(3px);
+}
+
+.watch-option img {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+.watch-option span {
+    font-weight: 500;
+}
+
+/* Watch now button - green style */
+.detail-btn.watch-now {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.detail-btn.watch-now:hover {
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Trailer container styles */
+.trailer-container {
+    width: 100%;
+    margin: 20px 0;
+}
+
+.trailer-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.trailer-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 12px;
+}
+
+.trailer-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    transition: all 0.2s ease;
+}
+
+.trailer-close:hover {
+    background-color: rgba(255, 75, 75, 0.9);
+    transform: rotate(90deg);
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+    .detail-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .watch-options {
+        left: auto;
+        right: 0;
+    }
+    
+    .trailer-wrapper {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .detail-btn, .detail-btn.watch-now {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .watch-options {
+        width: 200px;
+    }
+}
+
+/* Responsive styles for watch dropdown */
+@media (max-width: 992px) {
+    .watch-dropdown {
+        position: static;
+        /* Make the dropdown container full width on smaller screens */
+        width: 100%;
+    }
+
+    .watch-options {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 320px;
+        /* Center dropdown on smaller screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .watch-options {
+        min-width: 200px;
+        /* Adjust minimum width for tablets */
+    }
+
+    .watch-option {
+        padding: 14px 15px;
+        /* Larger touch target for mobile */
+    }
+    
+    .watch-option img {
+        width: 28px;
+        height: 28px;
+        /* Slightly larger icons for better visibility */
+    }
+}
+
+@media (max-width: 480px) {
+    .watch-dropdown {
+        /* Full width container on mobile */
+        display: block;
+    }
+    
+    .watch-options {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 92%;
+        max-width: none;
+        bottom: 20px;
+        top: auto;
+        /* Position at bottom of screen on mobile for easier thumb access */
+        box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
+        border-radius: 16px;
+        max-height: 60vh;
+        /* Limit height on small screens */
+    }
+    
+    .watch-options-list {
+        max-height: 50vh;
+        /* Adjust maximum height for mobile */
+    }
+    
+    .watch-option {
+        padding: 16px;
+        /* Even larger touch targets for mobile */
+    }
+    
+    .watch-options-header {
+        padding: 14px 16px;
+        text-align: center;
+        font-size: 1rem;
+        /* More prominent header on mobile */
+    }
+    
+    /* Add subtle indicator to show scrollable content */
+    .watch-options:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 30px;
+        background: linear-gradient(to top, rgba(22, 22, 30, 0.8), transparent);
+        pointer-events: none;
+        opacity: 0.6;
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+}
+
+/* Enhanced touch interactions for mobile */
+@media (hover: none) and (pointer: coarse) {
+    .watch-option {
+        transition: background-color 0.2s;
+    }
+    
+    .watch-option:active {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: none;
+        /* Better touch feedback instead of hover */
+    }
+    
+    /* Override hover styles for touch devices */
+    .watch-option:hover {
+        transform: none;
+    }
+}

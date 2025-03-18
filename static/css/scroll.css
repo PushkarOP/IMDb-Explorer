@@ -1,0 +1,65 @@
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(16, 16, 24, 0.6);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 107, 0, 0.5);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 107, 0, 0.5) rgba(16, 16, 24, 0.6);
+}
+
+/* Specific elements with scrollable content */
+.dropdown-content,
+.watch-options-list,
+.cast-grid,
+.modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 107, 0, 0.5) rgba(16, 16, 24, 0.6);
+}
+
+/* Hide scrollbar for clean look but keep functionality */
+.cast-grid::-webkit-scrollbar {
+    height: 6px;
+}
+
+.cast-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 107, 0, 0.3);
+}
+
+.cast-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 107, 0, 0.7);
+}
+
+/* Improved dropdown scrolling experience */
+.watch-options-list {
+    padding-right: 2px; /* Prevent content from touching scrollbar */
+}
+
+.watch-options-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+/* Modal content scrollbar refinement */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(16, 16, 24, 0.4);
+}
