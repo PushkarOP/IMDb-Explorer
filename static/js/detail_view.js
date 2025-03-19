@@ -63,6 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 renderDetailView(data, type);
+                
+                // If movie belongs to a collection, fetch collection details
+                if (type === 'movie' && data.belongs_to_collection) {
+                    fetchCollectionDetails(data.belongs_to_collection.id);
+                }
             })
             .catch(error => {
                 console.error('Error fetching details:', error);
@@ -74,6 +79,87 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
             });
     };
+    
+    function fetchCollectionDetails(collectionId) {
+        fetch(`/api/collection?id=${collectionId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch collection');
+                }
+                return response.json();
+            })
+            .then(collection => {
+                renderCollectionSection(collection);
+            })
+            .catch(error => {
+                console.error('Error fetching collection:', error);
+            });
+    }
+    
+    function renderCollectionSection(collection) {
+        const collectionSection = document.createElement('div');
+        collectionSection.className = 'detail-section collection-section';
+        
+        // Sort collection parts by release date
+        const sortedParts = collection.parts.sort((a, b) => {
+            const dateA = a.release_date ? new Date(a.release_date) : new Date(0);
+            const dateB = b.release_date ? new Date(b.release_date) : new Date(0);
+            return dateA - dateB;
+        });
+        
+        const collectionHTML = `
+            <div class="collection-header">
+                <h3>${collection.name}</h3>
+                <div class="collection-overview">
+                    ${collection.overview || 'A collection of related movies.'}
+                </div>
+            </div>
+            <div class="collection-grid">
+                ${sortedParts.map((movie, index) => {
+                    const posterPath = movie.poster_path
+                        ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
+                        : 'https://via.placeholder.com/200x300?text=No+Poster';
+                    
+                    const releaseDate = movie.release_date
+                        ? new Date(movie.release_date).toLocaleDateString('en-US', { year: 'numeric' })
+                        : 'TBA';
+                    
+                    const isReleased = movie.release_date && new Date(movie.release_date) <= new Date();
+                    const releaseBadge = !isReleased ? 
+                        '<span class="upcoming-badge">Upcoming</span>' : '';
+                    
+                    return `
+                        <div class="collection-item" data-id="${movie.id}">
+                            <div class="collection-poster-container">
+                                <img src="${posterPath}" alt="${movie.title}" class="collection-poster">
+                                <div class="collection-item-number">${index + 1}</div>
+                                ${releaseBadge}
+                            </div>
+                            <div class="collection-item-info">
+                                <div class="collection-item-title">${movie.title}</div>
+                                <div class="collection-item-year">${releaseDate}</div>
+                                ${movie.vote_average ? 
+                                    `<div class="collection-item-rating">
+                                        <i class="fas fa-star"></i> ${movie.vote_average.toFixed(1)}
+                                    </div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+        
+        collectionSection.innerHTML = collectionHTML;
+        modalContent.appendChild(collectionSection);
+        
+        // Add click events to collection items
+        document.querySelectorAll('.collection-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const movieId = this.getAttribute('data-id');
+                window.showDetail(movieId, 'movie');
+            });
+        });
+    }
     
     function renderDetailView(data, type) {
         // Format release date or first air date
@@ -147,28 +233,64 @@ document.addEventListener('DOMContentLoaded', function() {
             trailerKey = officialTrailer?.key || anyTrailer?.key || anyVideo?.key;
         }
         
+        // Format production companies
+        const productionCompanies = data.production_companies && data.production_companies.length > 0 
+            ? data.production_companies.map(company => {
+                const logo = company.logo_path 
+                    ? `<img src="https://image.tmdb.org/t/p/w92${company.logo_path}" alt="${company.name}" class="company-logo">`
+                    : `<span class="company-name-no-logo">${company.name}</span>`;
+                return `
+                    <div class="production-company">
+                        ${logo}
+                    </div>`;
+              }).join('')
+            : '<p>Information not available</p>';
+            
         // Check if item is in watchlist
         const isInWatchlist = window.isInWatchlist ? window.isInWatchlist(data.id, type) : false;
         const watchlistBtnClass = isInWatchlist ? 'in-watchlist' : '';
         const watchlistBtnIcon = isInWatchlist ? 'fa-bookmark' : 'fa-bookmark';
         const watchlistBtnText = isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist';
         
+        // Format additional info
+        const statusInfo = data.status ? `<div class="detail-info-item"><span>Status:</span> ${data.status}</div>` : '';
+        const budgetInfo = type === 'movie' && data.budget ? 
+            `<div class="detail-info-item"><span>Budget:</span> $${(data.budget / 1000000).toFixed(1)} million</div>` : '';
+        const revenueInfo = type === 'movie' && data.revenue ? 
+            `<div class="detail-info-item"><span>Revenue:</span> $${(data.revenue / 1000000).toFixed(1)} million</div>` : '';
+        const languageInfo = data.original_language ? 
+            `<div class="detail-info-item"><span>Language:</span> ${new Intl.DisplayNames(['en'], {type: 'language'}).of(data.original_language)}</div>` : '';
+        
+        // Create collection badge if movie belongs to a collection
+        const collectionBadge = type === 'movie' && data.belongs_to_collection ? 
+            `<div class="collection-badge">
+                <i class="fas fa-film"></i> Part of: ${data.belongs_to_collection.name}
+            </div>` : '';
+            
         // Create main content
         modalContent.innerHTML = `
-            <div class="detail-header" style="background-image: url('${backdropPath}')"></div>
+            <div class="detail-header" style="background-image: url('${backdropPath}')">
+                ${collectionBadge}
+            </div>
             <div class="detail-info">
-                <img class="detail-poster" src="${posterPath}" alt="${data.title || data.name}">
+                <div class="detail-poster-container">
+                    <img class="detail-poster" src="${posterPath}" alt="${data.title || data.name}">
+                    <div class="detail-rating-badge">
+                        <i class="fas fa-star"></i>
+                        <span>${data.vote_average ? data.vote_average.toFixed(1) : 'N/A'}</span>
+                    </div>
+                </div>
                 <div class="detail-text">
                     <h2 class="detail-title">${data.title || data.name}</h2>
                     <div class="detail-meta">
                         ${releaseDate ? `<div>${releaseDate}</div>` : ''}
-                        ${runtime ? `<div>${runtime}</div>` : ''}
+                        ${runtime ? `<div><i class="fas fa-clock"></i> ${runtime}</div>` : ''}
                         ${tvDetails}
                         <div>
-                            <i class="fas fa-star" style="color: var(--rating-color)"></i>
-                            <strong>${data.vote_average ? data.vote_average.toFixed(1) : 'N/A'}</strong>/10
+                            <i class="fas fa-user"></i> ${data.vote_count} votes
                         </div>
                     </div>
+                    <div class="detail-tagline">${data.tagline || ''}</div>
                     <div class="detail-genre-list">${genres}</div>
                     <p class="detail-overview">${data.overview || 'No overview available.'}</p>
                     <div class="detail-actions">
@@ -195,13 +317,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <span>Cineby</span>
                                     </a>
                                     <a href="${type === 'movie' ? 
-                                        `https://www.bitcine.app/movie/${data.id}` : 
-                                        `https://www.bitcine.app/tv/${data.id}`}" 
-                                       target="_blank" class="watch-option">
-                                        <img src="/static/img/bitcine.png" alt="Bitcine">
-                                        <span>Bitcine</span>
-                                    </a>
-                                    <a href="${type === 'movie' ? 
                                         `https://rivestream.org/detail?type=movie&id=${data.id}` : 
                                         `https://rivestream.org/detail?type=tv&id=${data.id}`}" 
                                        target="_blank" class="watch-option">
@@ -215,12 +330,48 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <img src="/static/img/autoembed.png" alt="Autoembed">
                                         <span>Autoembed</span>
                                     </a>
+                                    <a href="${type === 'movie' ? 
+                                        `https://broflix.ci/movie/${data.id}` : 
+                                        `https://broflix.ci/tv/${data.id}`}" 
+                                       target="_blank" class="watch-option">
+                                        <img src="/static/img/broflix.png" alt="Broflix">
+                                        <span>Broflix</span>
+                                    </a>
+                                    <a href="${type === 'movie' ? 
+                                        `https://freeky.to/watch/movie/${data.id}` : 
+                                        `https://freeky.to/watch/tv/${data.id}`}" 
+                                       target="_blank" class="watch-option">
+                                        <img src="/static/img/freek.png" alt="Freek">
+                                        <span>Freek</span>
+                                    </a>
+                                    <a href="${type === 'movie' ? 
+                                        `https://nunflix.org/movie/${data.id}` : 
+                                        `https://nunflix.org/tv/${data.id}`}" 
+                                       target="_blank" class="watch-option">
+                                        <img src="/static/img/nunflix.png" alt="Nunflix">
+                                        <span>Nunflix</span>
+                                    </a>
+                                    <a href="${type === 'movie' ? 
+                                        `https://alienflix.net/movie/${data.id}` : 
+                                        `https://alienflix.net/tv/${data.id}`}" 
+                                       target="_blank" class="watch-option">
+                                        <img src="/static/img/alienflix.png" alt="Alienflix">
+                                        <span>Alienflix</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                         <button class="detail-btn add-to-watchlist ${watchlistBtnClass}" id="addToWatchlistBtn">
                             <i class="fas ${watchlistBtnIcon}"></i> ${watchlistBtnText}
                         </button>
+                    </div>
+                    
+                    <!-- Additional information -->
+                    <div class="detail-additional-info">
+                        ${statusInfo}
+                        ${budgetInfo}
+                        ${revenueInfo}
+                        ${languageInfo}
                     </div>
                 </div>
             </div>
@@ -233,6 +384,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h3>Cast</h3>
                 <div class="cast-list" id="castList">
                     <div class="cast-loading"><div class="loader small"></div> Loading cast...</div>
+                </div>
+            </div>
+            
+            <!-- Production companies section -->
+            <div class="detail-section production-section">
+                <h3>Production</h3>
+                <div class="production-companies">
+                    ${productionCompanies}
                 </div>
             </div>
         `;

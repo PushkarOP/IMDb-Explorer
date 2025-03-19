@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const voteCountSlider = document.getElementById('voteCountSlider');  // Vote count slider container
     const voteCountRange = document.getElementById('voteCountRange');  // Vote count range input
     const voteCountValue = document.getElementById('voteCountValue');  // Vote count value display
+    const newBtn = document.getElementById('newBtn');  // New button for recent releases
     const popularBtn = document.getElementById('popularBtn');
     const topRatedBtn = document.getElementById('topRatedBtn');
     const activeFilters = document.getElementById('activeFilters');
@@ -118,9 +119,19 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchResults();
     });
 
+    newBtn.addEventListener('click', () => {
+        sortMethod = 'release_date.desc';
+        newBtn.classList.add('active');
+        popularBtn.classList.remove('active');
+        topRatedBtn.classList.remove('active');
+        updateActiveFilters();
+        fetchResults();
+    });
+
     popularBtn.addEventListener('click', () => {
         sortMethod = 'popularity.desc';
         popularBtn.classList.add('active');
+        newBtn.classList.remove('active');
         topRatedBtn.classList.remove('active');
         updateActiveFilters();
         fetchResults();
@@ -129,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
     topRatedBtn.addEventListener('click', () => {
         sortMethod = 'vote_average.desc';
         topRatedBtn.classList.add('active');
+        newBtn.classList.remove('active');
         popularBtn.classList.remove('active');
         updateActiveFilters();
         fetchResults();
@@ -201,6 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         voteCountRange.value = 500;  // Changed from 0 to 500
         voteCountValue.textContent = '500';  // Changed from '0' to '500'
         popularBtn.classList.add('active');
+        newBtn.classList.remove('active');
         topRatedBtn.classList.remove('active');
         
         // Reset page
@@ -663,7 +676,14 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         // Always add sort filter
-        if (sortMethod === 'popularity.desc') {
+        if (sortMethod === 'release_date.desc') {
+            filtersHTML += `
+                <div class="active-filter sort" data-type="sort" data-method="release_date.desc">
+                    <i class="fas fa-calendar-plus"></i>
+                    <span>New</span>
+                </div>
+            `;
+        } else if (sortMethod === 'popularity.desc') {
             filtersHTML += `
                 <div class="active-filter sort" data-type="sort" data-method="popularity.desc">
                     <i class="fas fa-fire"></i>

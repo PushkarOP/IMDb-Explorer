@@ -40,6 +40,13 @@ def discover():
     sort_by = request.args.get('sort_by', 'popularity.desc')  # Default to popular
     page = request.args.get('page', '1')
     
+    # Handle "New" sort option based on media type
+    if sort_by == 'release_date.desc':
+        if media_type == 'movie':
+            sort_by = 'primary_release_date.desc'
+        else:  # TV shows
+            sort_by = 'first_air_date.desc'
+    
     params = {
         'api_key': API_KEY,
         'language': 'en-US',
@@ -144,6 +151,25 @@ def get_detail():
     else:
         return jsonify({"error": f"Failed to fetch details. Status: {response.status_code}"}), 500
 
+@app.route('/api/collection', methods=['GET'])
+def get_collection():
+    collection_id = request.args.get('id')
+    
+    if not collection_id:
+        return jsonify({"error": "No collection ID provided"}), 400
+    
+    url = f"{BASE_URL}/collection/{collection_id}"
+    
+    response = requests.get(url, params={
+        'api_key': API_KEY,
+        'language': 'en-US'
+    })
+    
+    if response.status_code == 200:
+        return jsonify(response.json())
+    else:
+        return jsonify({"error": f"Failed to fetch collection. Status: {response.status_code}"}), 500
+
 @app.route('/api/popular', methods=['GET'])
 def popular():
     media_type = request.args.get('type', 'movie')  # Default to movie
@@ -160,6 +186,27 @@ def popular():
         return jsonify(response.json())
     else:
         return jsonify({"error": "Failed to fetch popular"}), 500
+
+@app.route('/api/new', methods=['GET'])
+def new_releases():
+    media_type = request.args.get('type', 'movie')  # Default to movie
+    page = request.args.get('page', '1')
+    
+    # For movies, we can use the "now_playing" endpoint
+    # For TV shows, we can use the "on_the_air" endpoint
+    endpoint = 'now_playing' if media_type == 'movie' else 'on_the_air'
+    
+    url = f"{BASE_URL}/{media_type}/{endpoint}"
+    response = requests.get(url, params={
+        'api_key': API_KEY,
+        'language': 'en-US',
+        'page': page
+    })
+    
+    if response.status_code == 200:
+        return jsonify(response.json())
+    else:
+        return jsonify({"error": "Failed to fetch new releases"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
