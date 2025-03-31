@@ -340,6 +340,80 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Add this new function to fetch and display OMDB ratings
+    function fetchOMDBRatings(title, year) {
+        const ratingsContainer = document.getElementById('externalRatings');
+        if (!ratingsContainer) return;
+        
+        // Construct URL with title and year if available
+        let url = `/api/omdb?title=${encodeURIComponent(title)}`;
+        if (year) {
+            url += `&year=${year}`;
+        }
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch OMDB data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.Response === "True") {
+                    // Create ratings display
+                    let ratingsHTML = '<div class="ratings-header">Ratings</div><div class="ratings-grid">';
+                    
+                    // Add IMDb rating
+                    if (data.imdbRating && data.imdbRating !== "N/A") {
+                        ratingsHTML += `
+                            <div class="rating-item imdb">
+                                <div class="rating-source">
+                                    <img src="/static/img/imdb.png" alt="IMDb" class="rating-logo">
+                                </div>
+                                <div class="rating-score">${data.imdbRating}/10</div>
+                                <div class="rating-votes">${data.imdbVotes} votes</div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Add Rotten Tomatoes, Metacritic, etc. from the Ratings array
+                    if (data.Ratings && data.Ratings.length > 0) {
+                        data.Ratings.forEach(rating => {
+                            if (rating.Source === "Rotten Tomatoes") {
+                                ratingsHTML += `
+                                    <div class="rating-item rotten-tomatoes">
+                                        <div class="rating-source">
+                                            <img src="/static/img/rottentomatoes.png" alt="Rotten Tomatoes" class="rating-logo">
+                                        </div>
+                                        <div class="rating-score">${rating.Value}</div>
+                                    </div>
+                                `;
+                            } else if (rating.Source === "Metacritic") {
+                                ratingsHTML += `
+                                    <div class="rating-item metacritic">
+                                        <div class="rating-source">
+                                            <img src="/static/img/metacritic.png" alt="Metacritic" class="rating-logo">
+                                        </div>
+                                        <div class="rating-score">${rating.Value}</div>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
+                    
+                    ratingsHTML += '</div>';
+                    ratingsContainer.innerHTML = ratingsHTML;
+                } else {
+                    // If no ratings found
+                    ratingsContainer.innerHTML = '<div class="no-ratings">No external ratings available</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching OMDB data:', error);
+                ratingsContainer.innerHTML = '<div class="ratings-error">Failed to load ratings</div>';
+            });
+    }
+    
     function renderDetailView(data, type) {
         // Format release date or first air date
         let releaseDate = '';
@@ -475,6 +549,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             <i class="fas fa-user"></i> ${data.vote_count} votes
                         </div>
                     </div>
+                    
+                    <!-- OMDB Ratings Section -->
+                    <div class="external-ratings" id="externalRatings">
+                        <div class="ratings-loading"><i class="fas fa-spinner fa-spin"></i> Loading ratings...</div>
+                    </div>
+                    
                     <div class="detail-tagline">${data.tagline || ''}</div>
                     <div class="detail-genre-list">${genres}</div>
                     <p class="detail-overview">${data.overview || 'No overview available.'}</p>
@@ -667,6 +747,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+        
+        // Fetch OMDB ratings
+        fetchOMDBRatings(data.title || data.name, releaseYear);
         
         // Load cast
         renderCast(data.credits);

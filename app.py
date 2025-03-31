@@ -225,7 +225,33 @@ def new_releases():
         return jsonify(response.json())
     else:
         return jsonify({"error": "Failed to fetch new releases"}), 500
-
+    
+@app.route('/api/omdb', methods=['GET'])
+def get_omdb_data():
+    title = request.args.get('title', '')
+    year = request.args.get('year', '')
+    
+    if not title:
+        return jsonify({"error": "No title provided"}), 400
+    
+    url = "http://www.omdbapi.com/"
+    
+    params = {
+        'apikey': '7387edbe',  # Using the provided API key
+        't': title
+    }
+    
+    # Add year parameter if provided
+    if year:
+        params['y'] = year
+    
+    response = requests.get(url, params=params)
+    
+    if response.status_code == 200:
+        return jsonify(response.json())
+    else:
+        return jsonify({"error": f"Failed to fetch OMDB data. Status: {response.status_code}"}), 500
+    
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
