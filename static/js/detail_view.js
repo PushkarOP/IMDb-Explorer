@@ -68,6 +68,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (type === 'movie' && data.belongs_to_collection) {
                     fetchCollectionDetails(data.belongs_to_collection.id);
                 }
+                
+                // If it's a TV show, fetch seasons details
+                if (type === 'tv' && data.seasons && data.seasons.length > 0) {
+                    renderSeasonsSection(data.id, data.seasons);
+                }
             })
             .catch(error => {
                 console.error('Error fetching details:', error);
@@ -94,6 +99,180 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Error fetching collection:', error);
             });
+    }
+    
+    function renderSeasonsSection(tvId, seasons) {
+        // Filter out specials season (season 0) unless it's the only season
+        let filteredSeasons = seasons.filter(season => season.season_number > 0);
+        if (filteredSeasons.length === 0) {
+            filteredSeasons = seasons; // If only specials exist, show them
+        }
+        
+        // Sort seasons by season number
+        filteredSeasons.sort((a, b) => a.season_number - b.season_number);
+        
+        const seasonsSection = document.createElement('div');
+        seasonsSection.className = 'detail-section seasons-section';
+        
+        const seasonsHTML = `
+            <div class="seasons-header">
+                <h3>Seasons</h3>
+                <div class="seasons-count">${filteredSeasons.length} season${filteredSeasons.length !== 1 ? 's' : ''}</div>
+            </div>
+            <div class="seasons-grid">
+                ${filteredSeasons.map(season => {
+                    const posterPath = season.poster_path
+                        ? `https://image.tmdb.org/t/p/w200${season.poster_path}`
+                        : 'https://via.placeholder.com/200x300?text=No+Poster';
+                    
+                    const airDate = season.air_date
+                        ? new Date(season.air_date).toLocaleDateString('en-US', { year: 'numeric' })
+                        : 'TBA';
+                    
+                    const episodeCount = season.episode_count || 0;
+                    
+                    // Calculate season rating if available
+                    const ratingDisplay = season.vote_average 
+                        ? `<div class="season-rating"><i class="fas fa-star"></i> ${season.vote_average.toFixed(1)}</div>` 
+                        : '';
+                    
+                    return `
+                        <div class="season-item" data-season="${season.season_number}" data-show-id="${tvId}">
+                            <div class="season-poster-container">
+                                <img src="${posterPath}" alt="${season.name}" class="season-poster">
+                                <div class="season-number">${season.season_number}</div>
+                            </div>
+                            <div class="season-info">
+                                <div class="season-name">${season.name}</div>
+                                <div class="season-meta">
+                                    <span>${airDate}</span>
+                                    <span>${episodeCount} episode${episodeCount !== 1 ? 's' : ''}</span>
+                                </div>
+                                ${ratingDisplay}
+                                <div class="season-overview">${season.overview || 'No overview available.'}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+        
+        seasonsSection.innerHTML = seasonsHTML;
+        modalContent.appendChild(seasonsSection);
+        
+        // Add click event for seasons
+        document.querySelectorAll('.season-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const seasonNumber = this.getAttribute('data-season');
+                const tvId = this.getAttribute('data-show-id');
+                fetchSeasonDetails(tvId, seasonNumber);
+            });
+        });
+    }
+    
+    function fetchSeasonDetails(tvId, seasonNumber) {
+        // Create a loading indicator in the clicked season item
+        const seasonItem = document.querySelector(`.season-item[data-season="${seasonNumber}"][data-show-id="${tvId}"]`);
+        if (seasonItem) {
+            const wasExpanded = seasonItem.classList.contains('expanded');
+            
+            // Remove expanded class from all seasons
+            document.querySelectorAll('.season-item.expanded').forEach(item => {
+                item.classList.remove('expanded');
+                const episodesContainer = item.querySelector('.season-episodes');
+                if (episodesContainer) {
+                    episodesContainer.remove();
+                }
+            });
+            
+            // If the clicked season was already expanded, we just close it (done above)
+            if (wasExpanded) {
+                return;
+            }
+            
+            // Add loading indicator
+            seasonItem.classList.add('expanded');
+            const episodesContainer = document.createElement('div');
+            episodesContainer.className = 'season-episodes';
+            episodesContainer.innerHTML = `
+                <div class="episodes-loading">
+                    <div class="loader small"></div>
+                    <p>Loading episodes...</p>
+                </div>
+            `;
+            seasonItem.appendChild(episodesContainer);
+            
+            // Fetch season details including episodes
+            fetch(`/api/tv/${tvId}/season/${seasonNumber}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch season details');
+                    }
+                    return response.json();
+                })
+                .then(seasonData => {
+                    renderSeasonEpisodes(seasonItem, seasonData);
+                })
+                .catch(error => {
+                    console.error('Error fetching season details:', error);
+                    episodesContainer.innerHTML = `
+                        <div class="episode-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Failed to load episodes. Please try again.</p>
+                        </div>
+                    `;
+                });
+        }
+    }
+    
+    function renderSeasonEpisodes(seasonItem, seasonData) {
+        const episodesContainer = seasonItem.querySelector('.season-episodes');
+        if (!episodesContainer) return;
+        
+        if (!seasonData.episodes || seasonData.episodes.length === 0) {
+            episodesContainer.innerHTML = `<p class="no-episodes">No episodes available.</p>`;
+            return;
+        }
+        
+        let episodesHTML = `
+            <div class="episodes-header">
+                <h4>Episodes</h4>
+                <div class="episodes-count">${seasonData.episodes.length} episode${seasonData.episodes.length !== 1 ? 's' : ''}</div>
+            </div>
+            <div class="episodes-list">
+        `;
+        
+        seasonData.episodes.forEach(episode => {
+            const stillPath = episode.still_path
+                ? `https://image.tmdb.org/t/p/w300${episode.still_path}`
+                : 'https://via.placeholder.com/300x170?text=No+Image';
+                
+            const airDate = episode.air_date
+                ? new Date(episode.air_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                : 'TBA';
+                
+            const rating = episode.vote_average
+                ? `<div class="episode-rating"><i class="fas fa-star"></i> ${episode.vote_average.toFixed(1)}</div>`
+                : '';
+                
+            episodesHTML += `
+                <div class="episode-item">
+                    <div class="episode-still">
+                        <img src="${stillPath}" alt="Episode ${episode.episode_number}">
+                        <div class="episode-number">${episode.episode_number}</div>
+                    </div>
+                    <div class="episode-info">
+                        <div class="episode-title">${episode.name}</div>
+                        <div class="episode-air-date">${airDate}</div>
+                        ${rating}
+                        <div class="episode-overview">${episode.overview || 'No overview available.'}</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        episodesHTML += `</div>`;
+        episodesContainer.innerHTML = episodesHTML;
     }
     
     function renderCollectionSection(collection) {
@@ -261,6 +440,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const languageInfo = data.original_language ? 
             `<div class="detail-info-item"><span>Language:</span> ${new Intl.DisplayNames(['en'], {type: 'language'}).of(data.original_language)}</div>` : '';
         
+        // TV-specific details
+        const createdByInfo = type === 'tv' && data.created_by && data.created_by.length > 0 ? 
+            `<div class="detail-info-item"><span>Created by:</span> ${data.created_by.map(creator => creator.name).join(', ')}</div>` : '';
+        const networksInfo = type === 'tv' && data.networks && data.networks.length > 0 ? 
+            `<div class="detail-info-item"><span>Networks:</span> ${data.networks.map(network => network.name).join(', ')}</div>` : '';
+        
         // Create collection badge if movie belongs to a collection
         const collectionBadge = type === 'movie' && data.belongs_to_collection ? 
             `<div class="collection-badge">
@@ -372,6 +557,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${budgetInfo}
                         ${revenueInfo}
                         ${languageInfo}
+                        ${createdByInfo}
+                        ${networksInfo}
                     </div>
                 </div>
             </div>

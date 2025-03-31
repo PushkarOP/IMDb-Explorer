@@ -187,6 +187,24 @@ def popular():
     else:
         return jsonify({"error": "Failed to fetch popular"}), 500
 
+@app.route('/api/tv/<id>/season/<season_number>', methods=['GET'])
+def get_tv_season(id, season_number):
+    if not id or not season_number:
+        return jsonify({"error": "Missing TV show ID or season number"}), 400
+    
+    url = f"{BASE_URL}/tv/{id}/season/{season_number}"
+    
+    response = requests.get(url, params={
+        'api_key': API_KEY,
+        'language': 'en-US',
+        'append_to_response': 'credits'
+    })
+    
+    if response.status_code == 200:
+        return jsonify(response.json())
+    else:
+        return jsonify({"error": f"Failed to fetch season details. Status: {response.status_code}"}), 500
+    
 @app.route('/api/new', methods=['GET'])
 def new_releases():
     media_type = request.args.get('type', 'movie')  # Default to movie
