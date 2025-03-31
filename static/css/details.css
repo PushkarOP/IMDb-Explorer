@@ -767,106 +767,151 @@ iframe[src*="youtube"] {
     font-size: 3rem;
     color: #dc3545;
 }
-
-/* External Ratings Styles */
+/* External Ratings Styles - Improved */
 .external-ratings {
-    margin: 15px 0 25px;
-    padding: 15px;
-    background-color: rgba(30, 30, 44, 0.4);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin: 20px 0 30px;
     animation: fadeIn 0.5s ease-out;
 }
 
-.ratings-header {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: var(--text-primary);
-    position: relative;
-    display: inline-block;
-}
-
-.ratings-header:after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 40px;
-    height: 2px;
-    background: var(--accent-gradient);
-    border-radius: 2px;
-}
-
-.ratings-grid {
+.ratings-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    justify-content: flex-start;
+    gap: 25px;
+    margin-top: 15px;
 }
 
-.rating-item {
+.rating-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 15px;
-    min-width: 110px;
-    border-radius: 12px;
-    background-color: rgba(22, 22, 30, 0.5);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.rating-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    gap: 15px;
+    padding: 0;
+    position: relative;
 }
 
 .rating-source {
-    margin-bottom: 10px;
+    text-align: center;
 }
 
 .rating-logo {
-    height: 26px;
+    height: 24px;
     object-fit: contain;
+    margin-bottom: 5px;
+    transition: transform 0.3s ease;
 }
 
-.rating-score {
-    font-size: 1.2rem;
+.rating-card:hover .rating-logo {
+    transform: scale(1.1);
+}
+
+/* Rating circle styling */
+.rating-circle {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    transition: transform 0.3s ease;
+}
+
+.rating-card:hover .rating-circle {
+    transform: scale(1.1);
+}
+
+.rating-circle-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.circle-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 2.5;
+}
+
+.circle-progress {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 0, 100; /* Start at 0 for animation */
+    transition: stroke-dasharray 1.2s ease-in-out;
+}
+
+.rating-text {
+    font-size: 10px;
     font-weight: bold;
-    color: white;
-    margin-bottom: 3px;
+    fill: white;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    transform: translateY(0.25rem);
+}
+
+.rating-info {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    min-height: 20px;
 }
 
 .rating-votes {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
+    white-space: nowrap;
 }
 
-/* Rating Item Specific Styles */
-.imdb {
-    border: 1px solid rgba(245, 197, 24, 0.4);
-    background-color: rgba(245, 197, 24, 0.05);
+/* Specific rating sources styling */
+.tmdb .circle-progress {
+    stroke: #01b4e4; /* TMDb blue color */
 }
 
-.rotten-tomatoes {
-    border: 1px solid rgba(255, 100, 0, 0.4);
-    background-color: rgba(255, 100, 0, 0.05);
+.imdb .circle-progress {
+    stroke: #f5c518; /* IMDb yellow */
 }
 
-.metacritic {
-    border: 1px solid rgba(0, 174, 174, 0.4);
-    background-color: rgba(0, 174, 174, 0.05);
+.rt-progress {
+    stroke: #fa320a; /* Rotten Tomatoes red */
 }
 
+.mc-progress {
+    stroke: #66cc33; /* Metacritic default color */
+}
+
+.mc-positive .mc-progress {
+    stroke: #66cc33; /* Metacritic green for positive */
+}
+
+.mc-mixed .mc-progress {
+    stroke: #ffcc33; /* Metacritic yellow for mixed */
+}
+
+.mc-negative .mc-progress {
+    stroke: #ff0000; /* Metacritic red for negative */
+}
+
+.tomato-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.mc-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05rem;
+    color: #aaa;
+}
+
+/* Loading and error states */
 .ratings-loading, .no-ratings, .ratings-error {
-    padding: 15px 10px;
+    padding: 20px 0;
     color: var(--text-secondary);
     text-align: center;
     font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
-.ratings-loading i {
-    margin-right: 8px;
-    color: var(--accent);
+.ratings-loading .loader {
+    margin: 0;
 }
 
 .ratings-error {
@@ -877,288 +922,71 @@ iframe[src*="youtube"] {
     font-style: italic;
 }
 
-/* Media queries for responsive design */
+/* Responsive styles for ratings */
 @media (max-width: 992px) {
-    .detail-header {
-        height: 350px;
-    }
-    
-    .collection-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    .ratings-container {
         gap: 20px;
     }
     
-    .ratings-grid {
-        justify-content: center;
-    }
-    
-    .rating-item {
+    .rating-card {
         min-width: 100px;
-        padding: 12px;
     }
 }
 
 @media (max-width: 768px) {
-    .detail-actions {
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-    }
-    
-    .detail-btn {
-        width: 100%;
+    .ratings-container {
         justify-content: center;
     }
     
-    .watch-options {
-        left: auto;
-        right: 0;
-    }
-    
-    .trailer-wrapper {
-        max-width: 100%;
-    }
-    
-    .detail-header {
-        height: 250px;
-    }
-    
-    .collection-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 15px;
-    }
-    
-    .detail-additional-info {
-        grid-template-columns: 1fr;
-    }
-    
-    .production-company {
-        height: 50px;
+    .rating-card {
+        min-width: 90px;
     }
     
     .external-ratings {
-        padding: 12px;
-    }
-    
-    .ratings-header {
-        text-align: center;
-        display: block;
-        margin-bottom: 20px;
-    }
-    
-    .ratings-header:after {
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60px;
+        padding: 12px 0;
     }
 }
 
 @media (max-width: 480px) {
-    .detail-info {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
+    .ratings-container {
+        gap: 15px;
     }
     
-    .detail-poster-container {
-        margin: 0 auto 20px;
-    }
-    
-    .detail-poster {
-        width: 180px;
-        height: 270px;
-        margin-right: 0;
-    }
-    
-    .detail-text {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .detail-genre-list {
-        justify-content: center;
-    }
-    
-    .detail-btn.watch-now {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .detail-section h3 {
-        text-align: center;
-        width: 100%;
-    }
-    
-    .detail-section h3:after {
-        left: 50%;
-        transform: translateX(-50%);
-    }
-    
-    .collection-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 10px;
-    }
-    
-    .production-companies {
-        justify-content: center;
-    }
-    
-    .collection-badge {
-        left: 50%;
-        top: 45%;
-        transform: translate(-50%, -50%);
-        white-space: nowrap;
-    }
-    
-    .rating-item {
-        min-width: 90px;
-        padding: 10px;
-        flex: 1;
+    .rating-circle {
+        width: 60px;
+        height: 60px;
     }
     
     .rating-logo {
-        height: 22px;
+        height: 20px;
     }
     
-    .rating-score {
-        font-size: 1.1rem;
+    .rating-info {
+        font-size: 0.75rem;
     }
     
-    .rating-votes {
-        font-size: 0.7rem;
-    }
-}
-
-/* Responsive styles for watch dropdown */
-@media (max-width: 992px) {
-    .watch-dropdown {
-        position: static;
-        /* Make the dropdown container full width on smaller screens */
-        width: 100%;
-    }
-
-    .watch-options {
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90%;
-        max-width: 320px;
-        /* Center dropdown on smaller screens */
-    }
-}
-
-@media (max-width: 768px) {
-    .watch-options {
-        min-width: 200px;
-        /* Adjust minimum width for tablets */
-    }
-
-    .watch-option {
-        padding: 14px 15px;
-        /* Larger touch target for mobile */
-    }
-    
-    .watch-option img {
-        width: 28px;
-        height: 28px;
-        /* Slightly larger icons for better visibility */
-    }
-}
-
-@media (max-width: 480px) {
-    .watch-dropdown {
-        /* Full width container on mobile */
-        display: block;
-    }
-    
-    .watch-options {
-        position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 92%;
-        max-width: none;
-        bottom: 20px;
-        top: auto;
-        /* Position at bottom of screen on mobile for easier thumb access */
-        box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
-        border-radius: 16px;
-        max-height: 60vh;
-        /* Limit height on small screens */
-    }
-    
-    .watch-options-list {
-        max-height: 50vh;
-        /* Adjust maximum height for mobile */
-    }
-    
-    .watch-option {
-        padding: 16px;
-        /* Even larger touch targets for mobile */
-    }
-    
-    .watch-options-header {
-        padding: 14px 16px;
-        text-align: center;
-        font-size: 1rem;
-        /* More prominent header on mobile */
-    }
-    
-    /* Add subtle indicator to show scrollable content */
-    .watch-options:after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 30px;
-        background: linear-gradient(to top, rgba(22, 22, 30, 0.8), transparent);
-        pointer-events: none;
-        opacity: 0.6;
-        border-bottom-left-radius: 16px;
-        border-bottom-right-radius: 16px;
+    .mc-label {
+        font-size: 0.65rem;
     }
 }
 
 /* Enhanced touch interactions for mobile */
 @media (hover: none) and (pointer: coarse) {
-    .watch-option {
-        transition: background-color 0.2s;
+    .rating-card:active {
+        transform: scale(1.05);
     }
     
-    .watch-option:active {
-        background-color: rgba(255, 255, 255, 0.1);
-        transform: none;
-        /* Better touch feedback instead of hover */
-    }
-    
-    /* Override hover styles for touch devices */
-    .watch-option:hover {
+    .rating-card:hover {
         transform: none;
     }
     
-    .collection-item:active {
-        transform: translateY(-3px);
-        background-color: rgba(255, 255, 255, 0.03);
-    }
-    
-    .collection-item:hover {
+    .rating-card:hover .rating-logo,
+    .rating-card:hover .rating-circle {
         transform: none;
     }
     
-    .cast-card:active {
-        transform: translateY(-3px);
-    }
-    
-    .cast-card:hover {
-        transform: none;
-    }
-    
-    .rating-item:active {
-        transform: translateY(-3px);
-        background-color: rgba(255, 255, 255, 0.03);
-    }
-    
-    .rating-item:hover {
-        transform: none;
+    .rating-card:active .rating-logo,
+    .rating-card:active .rating-circle {
+        transform: scale(1.05);
     }
 }

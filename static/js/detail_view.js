@@ -341,9 +341,49 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Add this new function to fetch and display OMDB ratings
-    function fetchOMDBRatings(title, year) {
+    function fetchOMDBRatings(title, year, tmdbRating) {
         const ratingsContainer = document.getElementById('externalRatings');
         if (!ratingsContainer) return;
+        
+        // Show loading state
+        ratingsContainer.innerHTML = '<div class="ratings-loading"><div class="loader small"></div> Loading ratings...</div>';
+        
+        // Add TMDb rating first
+        let ratingsHTML = '<div class="ratings-container">';
+        
+        // Add TMDb rating
+        if (tmdbRating && tmdbRating !== "N/A") {
+            // Convert rating to a percentage for the progress circle
+            const tmdbScore = parseFloat(tmdbRating);
+            const tmdbPercentage = (tmdbScore / 10) * 100;
+            
+            ratingsHTML += `
+                <div class="rating-card tmdb">
+                    <div class="rating-source">
+                        <img src="/static/img/themoviedb.png" alt="TMDb" class="rating-logo">
+                    </div>
+                    <div class="rating-circle" data-percentage="${tmdbPercentage}">
+                        <svg viewBox="0 0 36 36" class="rating-circle-svg">
+                            <path class="circle-bg"
+                                d="M18 2.0845
+                                a 15.9155 15.9155 0 0 1 0 31.831
+                                a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                            <path class="circle-progress tmdb-progress"
+                                stroke-dasharray="${tmdbPercentage}, 100"
+                                d="M18 2.0845
+                                a 15.9155 15.9155 0 0 1 0 31.831
+                                a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                            <text x="18" y="20.35" class="rating-text">${tmdbRating}</text>
+                        </svg>
+                    </div>
+                    <div class="rating-info">
+                        <div class="rating-votes">TMDb Rating</div>
+                    </div>
+                </div>
+            `;
+        }
         
         // Construct URL with title and year if available
         let url = `/api/omdb?title=${encodeURIComponent(title)}`;
@@ -360,41 +400,108 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 if (data.Response === "True") {
-                    // Create ratings display
-                    let ratingsHTML = '<div class="ratings-header">Ratings</div><div class="ratings-grid">';
-                    
                     // Add IMDb rating
                     if (data.imdbRating && data.imdbRating !== "N/A") {
+                        // Convert rating to a percentage for the progress circle
+                        const imdbScore = parseFloat(data.imdbRating);
+                        const imdbPercentage = (imdbScore / 10) * 100;
+                        const formattedVotes = parseInt(data.imdbVotes.replace(/,/g, '')).toLocaleString();
+                        
                         ratingsHTML += `
-                            <div class="rating-item imdb">
+                            <div class="rating-card imdb">
                                 <div class="rating-source">
                                     <img src="/static/img/imdb.png" alt="IMDb" class="rating-logo">
                                 </div>
-                                <div class="rating-score">${data.imdbRating}/10</div>
-                                <div class="rating-votes">${data.imdbVotes} votes</div>
+                                <div class="rating-circle" data-percentage="${imdbPercentage}">
+                                    <svg viewBox="0 0 36 36" class="rating-circle-svg">
+                                        <path class="circle-bg"
+                                            d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                                        />
+                                        <path class="circle-progress imdb-progress"
+                                            stroke-dasharray="${imdbPercentage}, 100"
+                                            d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                                        />
+                                        <text x="18" y="20.35" class="rating-text">${data.imdbRating}</text>
+                                    </svg>
+                                </div>
+                                <div class="rating-info">
+                                    <div class="rating-votes">${formattedVotes} votes</div>
+                                </div>
                             </div>
                         `;
                     }
                     
-                    // Add Rotten Tomatoes, Metacritic, etc. from the Ratings array
+                    // Add Rotten Tomatoes and Metacritic (rest of code unchanged)
                     if (data.Ratings && data.Ratings.length > 0) {
+                        // [existing code for Rotten Tomatoes and Metacritic]
                         data.Ratings.forEach(rating => {
                             if (rating.Source === "Rotten Tomatoes") {
+                                // Convert percentage string to number
+                                const rtScore = parseInt(rating.Value.replace('%', ''));
+                                
                                 ratingsHTML += `
-                                    <div class="rating-item rotten-tomatoes">
+                                    <div class="rating-card rotten-tomatoes">
                                         <div class="rating-source">
                                             <img src="/static/img/rottentomatoes.png" alt="Rotten Tomatoes" class="rating-logo">
                                         </div>
-                                        <div class="rating-score">${rating.Value}</div>
+                                        <div class="rating-circle" data-percentage="${rtScore}">
+                                            <svg viewBox="0 0 36 36" class="rating-circle-svg">
+                                                <path class="circle-bg"
+                                                    d="M18 2.0845
+                                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                />
+                                                <path class="circle-progress rt-progress"
+                                                    stroke-dasharray="${rtScore}, 100"
+                                                    d="M18 2.0845
+                                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                />
+                                                <text x="18" y="20.35" class="rating-text">${rating.Value}</text>
+                                            </svg>
+                                        </div>
+                                        <div class="rating-info">
+                                            <div class="mc-label">TOMATO</div>
+                                        </div>
                                     </div>
                                 `;
                             } else if (rating.Source === "Metacritic") {
+                                // Convert Metacritic score (e.g., "75/100" to number)
+                                const mcScore = parseInt(rating.Value.split('/')[0]);
+                                
+                                // Determine color class based on score
+                                let mcColorClass = "mc-mixed";
+                                if (mcScore >= 75) mcColorClass = "mc-positive";
+                                else if (mcScore < 50) mcColorClass = "mc-negative";
+                                
                                 ratingsHTML += `
-                                    <div class="rating-item metacritic">
+                                    <div class="rating-card metacritic">
                                         <div class="rating-source">
                                             <img src="/static/img/metacritic.png" alt="Metacritic" class="rating-logo">
                                         </div>
-                                        <div class="rating-score">${rating.Value}</div>
+                                        <div class="rating-circle ${mcColorClass}" data-percentage="${mcScore}">
+                                            <svg viewBox="0 0 36 36" class="rating-circle-svg">
+                                                <path class="circle-bg"
+                                                    d="M18 2.0845
+                                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                />
+                                                <path class="circle-progress mc-progress"
+                                                    stroke-dasharray="${mcScore}, 100"
+                                                    d="M18 2.0845
+                                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                />
+                                                <text x="18" y="20.35" class="rating-text">${mcScore}</text>
+                                            </svg>
+                                        </div>
+                                        <div class="rating-info">
+                                            <div class="mc-label">METASCORE</div>
+                                        </div>
                                     </div>
                                 `;
                             }
@@ -403,14 +510,54 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     ratingsHTML += '</div>';
                     ratingsContainer.innerHTML = ratingsHTML;
+                    
+                    // Initialize the progress circle animations
+                    setTimeout(() => {
+                        document.querySelectorAll('.rating-circle').forEach(circle => {
+                            const percentage = circle.getAttribute('data-percentage');
+                            const progressPath = circle.querySelector('.circle-progress');
+                            progressPath.style.strokeDasharray = `${percentage}, 100`;
+                        });
+                    }, 100);
+                    
                 } else {
-                    // If no ratings found
-                    ratingsContainer.innerHTML = '<div class="no-ratings">No external ratings available</div>';
+                    // If no OMDB ratings found, still show TMDb rating
+                    if (ratingsHTML !== '<div class="ratings-container">') {
+                        ratingsHTML += '</div>';
+                        ratingsContainer.innerHTML = ratingsHTML;
+                        
+                        // Initialize the progress circle animations
+                        setTimeout(() => {
+                            document.querySelectorAll('.rating-circle').forEach(circle => {
+                                const percentage = circle.getAttribute('data-percentage');
+                                const progressPath = circle.querySelector('.circle-progress');
+                                progressPath.style.strokeDasharray = `${percentage}, 100`;
+                            });
+                        }, 100);
+                    } else {
+                        // If no ratings at all
+                        ratingsContainer.innerHTML = '<div class="no-ratings">No external ratings available</div>';
+                    }
                 }
             })
             .catch(error => {
                 console.error('Error fetching OMDB data:', error);
-                ratingsContainer.innerHTML = '<div class="ratings-error">Failed to load ratings</div>';
+                // If error fetching OMDB, still show TMDb rating if available
+                if (ratingsHTML !== '<div class="ratings-container">') {
+                    ratingsHTML += '</div>';
+                    ratingsContainer.innerHTML = ratingsHTML;
+                    
+                    // Initialize the progress circle animations
+                    setTimeout(() => {
+                        document.querySelectorAll('.rating-circle').forEach(circle => {
+                            const percentage = circle.getAttribute('data-percentage');
+                            const progressPath = circle.querySelector('.circle-progress');
+                            progressPath.style.strokeDasharray = `${percentage}, 100`;
+                        });
+                    }, 100);
+                } else {
+                    ratingsContainer.innerHTML = '<div class="ratings-error">Failed to load ratings</div>';
+                }
             });
     }
     
@@ -749,7 +896,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Fetch OMDB ratings
-        fetchOMDBRatings(data.title || data.name, releaseYear);
+        fetchOMDBRatings(data.title || data.name, releaseYear, data.vote_average ? data.vote_average.toFixed(1) : 'N/A');
         
         // Load cast
         renderCast(data.credits);
