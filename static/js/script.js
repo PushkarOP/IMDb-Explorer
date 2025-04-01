@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
             searchQuery = query;
             // Reset page to 1 when performing a new search
             currentPage = 1;
-            fetchSearchResults();
+            fetchSearchResults(true); // Pass true to include all media types
         } else {
             searchQuery = '';
             fetchResults();
@@ -300,13 +300,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    function fetchSearchResults() {
+    function fetchSearchResults(includeAllTypes = false) {
         showLoading(true);
         
         let params = new URLSearchParams({
             type: mediaType,
             page: currentPage,
-            query: searchQuery
+            query: searchQuery,
+            include_all_types: includeAllTypes ? 'true' : 'false'
         });
         
         fetch(`/api/search?${params}`)
@@ -397,10 +398,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // If there's a search query, use search endpoint
         if (searchQuery) {
+            // Determine if we're including all types based on if there's an active search filter
+            const isAllTypesSearch = document.querySelector('.active-filter.search') !== null;
+            
             let params = new URLSearchParams({
                 type: mediaType,
                 page: currentPage,
-                query: searchQuery
+                query: searchQuery,
+                include_all_types: isAllTypesSearch ? 'true' : 'false'
             });
             
             fetch(`/api/search?${params}`)
@@ -489,9 +494,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const card = document.createElement('div');
             card.className = 'movie-card';
             
+            // Get the item's media type (for combined search results)
+            const itemType = item.media_type || mediaType;
+            
             // Set data attributes for the card
             card.dataset.id = item.id;
-            card.dataset.type = mediaType;
+            card.dataset.type = itemType;
             
             // Make card clickable
             card.addEventListener('click', function() {
@@ -513,9 +521,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Format release date or first air date
             let releaseDate = '';
-            if (mediaType === 'movie' && item.release_date) {
+            if (itemType === 'movie' && item.release_date) {
                 releaseDate = new Date(item.release_date).getFullYear();
-            } else if (mediaType === 'tv' && item.first_air_date) {
+            } else if (itemType === 'tv' && item.first_air_date) {
                 releaseDate = new Date(item.first_air_date).getFullYear();
             } else if (item.Year) {
                 // OMDB format
@@ -533,7 +541,15 @@ document.addEventListener('DOMContentLoaded', function() {
             let imdbRating = item.imdb_rating && item.imdb_rating !== 'N/A' ? item.imdb_rating : 'N/A';
             let imdbVotes = item.imdb_votes && item.imdb_votes !== 'N/A' ? formatVoteCount(item.imdb_votes) : '0';
             
+            // Create media type badge HTML (only for combined search)
+            const typeBadgeHTML = item.media_type ? 
+                `<div class="media-type-badge ${item.media_type}">
+                    <i class="fas fa-${item.media_type === 'movie' ? 'film' : 'tv'}"></i>
+                    <span>${item.media_type === 'movie' ? 'Movie' : 'TV'}</span>
+                </div>` : '';
+            
             card.innerHTML = `
+                ${typeBadgeHTML}
                 <img src="${posterPath}" alt="${title}" loading="lazy">
                 <div class="movie-info">
                     <h3 class="movie-title">${title}</h3>

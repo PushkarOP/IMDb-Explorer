@@ -1042,3 +1042,30 @@ footer i.fa-heart {
     opacity: 0.8;
 }
 
+/* Add this to your styles.css file */
+.media-type-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.media-type-badge.movie {
+    background-color: rgba(255, 87, 51, 0.85);
+}
+
+.media-type-badge.tv {
+    background-color: rgba(51, 153, 255, 0.85);
+}
+
+.media-type-badge i {
+    font-size: 0.9rem;
+}

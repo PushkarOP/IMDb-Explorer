@@ -121,10 +121,62 @@ def search():
     query = request.args.get('query', '')
     media_type = request.args.get('type', 'movie')  # Default to movie
     page = request.args.get('page', '1')
+    include_all_types = request.args.get('include_all_types', 'false').lower() == 'true'
     
     if not query:
         return jsonify({"error": "No search query provided"}), 400
     
+    # If include_all_types is true, search both movies and TV shows
+    if include_all_types:
+        # Create futures for parallel requests
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            # Submit both search requests in parallel
+            movie_future = executor.submit(
+                search_tmdb, API_KEY, query, 'movie', page
+            )
+            tv_future = executor.submit(
+                search_tmdb, API_KEY, query, 'tv', page
+            )
+            
+            # Get results from both futures
+            movie_results = movie_future.result()
+            tv_results = tv_future.result()
+            
+            # Combine results
+            combined_results = []
+            if movie_results and 'results' in movie_results:
+                for item in movie_results['results']:
+                    item['media_type'] = 'movie'
+                    combined_results.append(item)
+            
+            if tv_results and 'results' in tv_results:
+                for item in tv_results['results']:
+                    item['media_type'] = 'tv'
+                    combined_results.append(item)
+            
+            # Sort by vote_count (highest first)
+            combined_results.sort(key=lambda x: x.get('vote_count', 0), reverse=True)
+            
+            # Create a response structure with pagination
+            total_results = (movie_results.get('total_results', 0) if movie_results else 0) + \
+                           (tv_results.get('total_results', 0) if tv_results else 0)
+            
+            # Calculate an approximate total_pages based on combined results
+            total_pages = min(100, (total_results + 19) // 20)
+            
+            # Use parallel processing to enrich results with OMDB data
+            enriched_results = parallel_enrich_combined_results(combined_results)
+            
+            response_data = {
+                'page': int(page),
+                'results': enriched_results[:20],  # Return first 20 results for current page
+                'total_results': total_results,
+                'total_pages': total_pages
+            }
+            
+            return jsonify(response_data)
+    
+    # Original single media type search
     url = f"{TMDB_BASE_URL}/search/{media_type}"
     response = requests.get(url, params={
         'api_key': API_KEY,
@@ -139,6 +191,10 @@ def search():
         
         # Use parallel processing to enrich results with OMDB data
         enriched_results = parallel_enrich_results(data['results'], media_type)
+        
+        # Sort by vote_count (highest first)
+        enriched_results.sort(key=lambda x: x.get('vote_count', 0), reverse=True)
+        
         data['results'] = enriched_results
         
         return jsonify(data)
@@ -149,6 +205,58 @@ def search():
             return jsonify(omdb_results)
         except Exception as e:
             return jsonify({"error": f"Failed to search. Status: {response.status_code}. OMDB fallback failed: {str(e)}"}), 500
+
+# Helper function to search TMDB
+def search_tmdb(api_key, query, media_type, page):
+    url = f"{TMDB_BASE_URL}/search/{media_type}"
+    response = requests.get(url, params={
+        'api_key': api_key,
+        'language': 'en-US',
+        'query': query,
+        'page': page,
+        'include_adult': 'false'
+    })
+    
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+# Helper function to enrich combined results
+def parallel_enrich_combined_results(items):
+    """Process a list of mixed media type items in parallel to enrich with OMDB data"""
+    if not items:
+        return []
+    
+    # Create a list to store the futures
+    futures = []
+    
+    # Submit all tasks to the thread pool
+    for item in items:
+        media_type = item.get('media_type', 'movie')
+        title = item.get('title' if media_type == 'movie' else 'name', '')
+        year = ''
+        
+        # Extract year from release date or first air date
+        if media_type == 'movie' and item.get('release_date'):
+            year = item['release_date'][:4]
+        elif media_type == 'tv' and item.get('first_air_date'):
+            year = item['first_air_date'][:4]
+        
+        # Submit the task to the thread pool
+        future = executor.submit(enrich_item_with_omdb, item, title, year)
+        futures.append((future, item))
+    
+    # Process results as they complete
+    enriched_results = []
+    for future, original_item in futures:
+        try:
+            enriched_item = future.result()
+            enriched_results.append(enriched_item)
+        except Exception as e:
+            print(f"Error enriching item: {e}")
+            enriched_results.append(original_item)  # Use original item if enrichment fails
+    
+    return enriched_results
 
 def search_omdb(query, media_type, page):
     # OMDB doesn't support pagination, so we'll simulate it
