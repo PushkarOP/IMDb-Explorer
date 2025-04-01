@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Add this new function to fetch and display OMDB ratings
-    function fetchOMDBRatings(title, year, tmdbRating) {
+    function fetchOMDBRatings(title, year, tmdbRating, tmdbRatingVotes) {
         const ratingsContainer = document.getElementById('externalRatings');
         if (!ratingsContainer) return;
         
@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Convert rating to a percentage for the progress circle
             const tmdbScore = parseFloat(tmdbRating);
             const tmdbPercentage = (tmdbScore / 10) * 100;
-            
+            const tmdbVotes = parseInt(tmdbRatingVotes.toString().replace(/,/g, '')).toLocaleString();
             ratingsHTML += `
                 <div class="rating-card tmdb">
                     <div class="rating-source">
@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </svg>
                     </div>
                     <div class="rating-info">
-                        <div class="rating-votes">TMDb Rating</div>
+                        <div class="rating-votes">${tmdbVotes} votes</div>
                     </div>
                 </div>
             `;
@@ -729,6 +729,13 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <span>Cineby</span>
                                     </a>
                                     <a href="${type === 'movie' ? 
+                                        `https://hexa.watch/movie/${data.id}` : 
+                                        `https://hexa.watch/tv/${data.id}`}" 
+                                       target="_blank" class="watch-option">
+                                        <img src="/static/img/hexa.png" alt="Hexa">
+                                        <span>Hexa</span>
+                                    </a>
+                                    <a href="${type === 'movie' ? 
                                         `https://rivestream.org/detail?type=movie&id=${data.id}` : 
                                         `https://rivestream.org/detail?type=tv&id=${data.id}`}" 
                                        target="_blank" class="watch-option">
@@ -896,7 +903,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Fetch OMDB ratings
-        fetchOMDBRatings(data.title || data.name, releaseYear, data.vote_average ? data.vote_average.toFixed(1) : 'N/A');
+        fetchOMDBRatings(data.title || data.name, releaseYear, data.vote_average ? data.vote_average.toFixed(1) : 'N/A', data.vote_count || 0);
         
         // Load cast
         renderCast(data.credits);
