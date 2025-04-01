@@ -454,8 +454,51 @@ header h1 i {
     filter: brightness(1.15) contrast(1.1);
 }
 
+/* Style for dual ratings display */
+.movie-card .movie-info .movie-ratings {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.movie-card .movie-info .rating {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    background-color: rgba(15, 15, 20, 0.5);
+    padding: 5px 10px;
+    border-radius: 20px;
+    align-self: flex-start;
+}
+
+.movie-card .movie-info .rating-label {
+    font-weight: 600;
+    margin-right: 4px;
+    min-width: 45px;
+}
+
+.movie-card .movie-info .rating i {
+    margin-right: 4px;
+}
+
+.movie-card .movie-info .rating.tmdb i {
+    color: #01b4e4; /* TMDB blue */
+}
+
+.movie-card .movie-info .rating.imdb i {
+    color: #f5c518; /* IMDb yellow */
+}
+
+.movie-card .movie-info .rating .vote-count {
+    color: #b3b3b3;
+    font-size: 0.8rem;
+    margin-left: 3px;
+}
+
 .movie-info {
-    padding: 18px;
+    padding: 15px;
+    min-height: 120px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;

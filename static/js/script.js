@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPage = 1;
     let totalPages = 0;
     let selectedGenres = [];
-    let selectedRating = 5;  // Changed from 0 to 5
+    let selectedRating = 5;
     let selectedYear = 0;  // Default to 0 (All years)
-    let selectedVoteCount = 500; // Changed from 0 to 500
+    let selectedVoteCount = 500;
     let sortMethod = 'popularity.desc'; // Default sort method (Popular)
     let mediaType = 'movie'; // Default media type
     let searchQuery = '';   // For search functionality
@@ -23,11 +23,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const yearSlider = document.getElementById('yearSlider');
     const yearRange = document.getElementById('yearRange');
     const yearValue = document.getElementById('yearValue');
-    const voteCountBtn = document.getElementById('voteCountBtn');  // Vote count button
-    const voteCountSlider = document.getElementById('voteCountSlider');  // Vote count slider container
-    const voteCountRange = document.getElementById('voteCountRange');  // Vote count range input
-    const voteCountValue = document.getElementById('voteCountValue');  // Vote count value display
-    const newBtn = document.getElementById('newBtn');  // New button for recent releases
+    const voteCountBtn = document.getElementById('voteCountBtn');
+    const voteCountSlider = document.getElementById('voteCountSlider');
+    const voteCountRange = document.getElementById('voteCountRange');
+    const voteCountValue = document.getElementById('voteCountValue');
+    const newBtn = document.getElementById('newBtn');
     const popularBtn = document.getElementById('popularBtn');
     const topRatedBtn = document.getElementById('topRatedBtn');
     const activeFilters = document.getElementById('activeFilters');
@@ -72,14 +72,14 @@ document.addEventListener('DOMContentLoaded', function() {
         genreDropdown.classList.toggle('show');
         ratingSlider.classList.remove('show');
         yearSlider.classList.remove('show');
-        voteCountSlider.classList.remove('show');  // Hide vote count slider
+        voteCountSlider.classList.remove('show');
     });
 
     ratingBtn.addEventListener('click', () => {
         ratingSlider.classList.toggle('show');
         genreDropdown.classList.remove('show');
         yearSlider.classList.remove('show');
-        voteCountSlider.classList.remove('show');  // Hide vote count slider
+        voteCountSlider.classList.remove('show');
     });
 
     // Year filter event listeners
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         yearSlider.classList.toggle('show');
         genreDropdown.classList.remove('show');
         ratingSlider.classList.remove('show');
-        voteCountSlider.classList.remove('show');  // Hide vote count slider
+        voteCountSlider.classList.remove('show');
     });
 
     // Vote count filter event listeners
@@ -185,10 +185,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize the application
     // Set default values for sliders on page load
-    ratingRange.value = 5;  // Set rating slider to 5
-    ratingValue.textContent = '5';  // Update rating display
-    voteCountRange.value = 500;  // Set vote count slider to 500
-    voteCountValue.textContent = '500';  // Update vote count display
+    ratingRange.value = 5;
+    ratingValue.textContent = '5';
+    voteCountRange.value = 500;
+    voteCountValue.textContent = '500';
     
     fetchGenres();
     fetchResults();
@@ -198,20 +198,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetFilters() {
         // Reset all filters to default values
         selectedGenres = [];
-        selectedRating = 5;  // Changed from 0 to 5
+        selectedRating = 5;
         selectedYear = 0;
-        selectedVoteCount = 500;  // Changed from 0 to 500
+        selectedVoteCount = 500;
         sortMethod = 'popularity.desc';
         searchQuery = '';
         searchInput.value = '';
         
         // Reset UI elements
-        ratingRange.value = 5;  // Changed from 0 to 5
-        ratingValue.textContent = '5';  // Changed from '0' to '5'
+        ratingRange.value = 5;
+        ratingValue.textContent = '5';
         yearRange.value = 1900;
         yearValue.textContent = 'All';
-        voteCountRange.value = 500;  // Changed from 0 to 500
-        voteCountValue.textContent = '500';  // Changed from '0' to '500'
+        voteCountRange.value = 500;
+        voteCountValue.textContent = '500';
         popularBtn.classList.add('active');
         newBtn.classList.remove('active');
         topRatedBtn.classList.remove('active');
@@ -351,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: mediaType,
             page: currentPage,
             rating: selectedRating,
-            vote_count: selectedVoteCount,  // Add vote count parameter
+            vote_count: selectedVoteCount,
             sort_by: sortMethod
         });
         
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: mediaType,
             page: currentPage,
             rating: selectedRating,
-            vote_count: selectedVoteCount,  // Add vote count parameter
+            vote_count: selectedVoteCount,
             sort_by: sortMethod
         });
         
@@ -498,10 +498,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 showDetail(this.dataset.id, this.dataset.type);
             });
             
-            // Check if poster path exists
-            let posterPath = item.poster_path 
-                ? `https://image.tmdb.org/t/p/w342${item.poster_path}` 
-                : 'https://via.placeholder.com/342x513?text=No+Poster';
+            // Check if poster path exists (support both TMDB and OMDB formats)
+            let posterPath;
+            if (item.poster_path) {
+                // TMDB format
+                posterPath = `https://image.tmdb.org/t/p/w342${item.poster_path}`;
+            } else if (item.poster_url && item.poster_url !== 'N/A') {
+                // OMDB format
+                posterPath = item.poster_url;
+            } else {
+                // No poster available
+                posterPath = 'https://via.placeholder.com/342x513?text=No+Poster';
+            }
             
             // Format release date or first air date
             let releaseDate = '';
@@ -509,28 +517,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 releaseDate = new Date(item.release_date).getFullYear();
             } else if (mediaType === 'tv' && item.first_air_date) {
                 releaseDate = new Date(item.first_air_date).getFullYear();
+            } else if (item.Year) {
+                // OMDB format
+                releaseDate = item.Year;
             } else {
                 releaseDate = 'Unknown';
             }
             
-            // Get title based on media type
-            let title = mediaType === 'movie' ? item.title : item.name;
+            // Get title based on media type (supporting both TMDB and OMDB formats)
+            let title = item.title || item.name || item.Title || 'Unknown Title';
+            
+            // Get both TMDB and IMDb ratings
+            let tmdbRating = item.vote_average ? item.vote_average.toFixed(1) : 'N/A';
+            let tmdbVotes = item.vote_count ? formatNumber(item.vote_count) : '0';
+            let imdbRating = item.imdb_rating && item.imdb_rating !== 'N/A' ? item.imdb_rating : 'N/A';
+            let imdbVotes = item.imdb_votes && item.imdb_votes !== 'N/A' ? formatVoteCount(item.imdb_votes) : '0';
             
             card.innerHTML = `
                 <img src="${posterPath}" alt="${title}" loading="lazy">
                 <div class="movie-info">
                     <h3 class="movie-title">${title}</h3>
                     <div class="movie-year">${releaseDate}</div>
-                    <div class="movie-rating">
-                        <i class="fas fa-star"></i>
-                        <span>${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}</span>
-                        <span class="vote-count">(${item.vote_count || 0})</span>
+                    <div class="movie-ratings">
+                        <div class="rating tmdb">
+                            <span class="rating-label">TMDB:</span>
+                            <i class="fas fa-star"></i>
+                            <span>${tmdbRating}</span>
+                            <span class="vote-count">(${tmdbVotes})</span>
+                        </div>
+                        <div class="rating imdb">
+                            <span class="rating-label">IMDb:</span>
+                            <i class="fas fa-star"></i>
+                            <span>${imdbRating}</span>
+                            <span class="vote-count">(${imdbVotes})</span>
+                        </div>
                     </div>
                 </div>
             `;
             
             resultsContainer.appendChild(card);
         });
+    }
+    
+    // Helper function to format numbers with commas for thousands
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Helper function to format vote count (handle both string and number formats)
+    function formatVoteCount(voteCount) {
+        if (typeof voteCount === 'string') {
+            // Remove commas if present and try to parse as number
+            return voteCount.replace(/,/g, '');
+        }
+        return voteCount;
     }
 
     function updatePagination() {
