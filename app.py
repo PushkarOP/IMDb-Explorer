@@ -18,7 +18,7 @@ app = Flask(__name__)
 cache_config = {
     "DEBUG": True,
     "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
-    "CACHE_DEFAULT_TIMEOUT": 300  # 5 minutes default cache timeout
+    "CACHE_DEFAULT_TIMEOUT": 604800  # 1 week default cache timeout
 }
 app.config.from_mapping(cache_config)
 cache = Cache(app)
