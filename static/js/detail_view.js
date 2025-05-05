@@ -722,13 +722,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="watch-options-header">Watch on:</div>
                                 <div class="watch-options-list">
                                     <a href="${type === 'movie' ? 
-                                        `https://www.cineby.app/movie/${data.id}` : 
-                                        `https://www.cineby.app/tv/${data.id}`}" 
-                                       target="_blank" class="watch-option">
-                                        <img src="/static/img/cineby.png" alt="Cineby">
-                                        <span>Cineby</span>
-                                    </a>
-                                    <a href="${type === 'movie' ? 
                                         `https://hexa.watch/movie/${data.id}` : 
                                         `https://hexa.watch/tv/${data.id}`}" 
                                        target="_blank" class="watch-option">
@@ -736,8 +729,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <span>Hexa</span>
                                     </a>
                                     <a href="${type === 'movie' ? 
-                                        `https://rivestream.org/detail?type=movie&id=${data.id}` : 
-                                        `https://rivestream.org/detail?type=tv&id=${data.id}`}" 
+                                        `https://rivestream.net/detail?type=movie&id=${data.id}` : 
+                                        `https://rivestream.net/detail?type=tv&id=${data.id}`}" 
                                        target="_blank" class="watch-option">
                                         <img src="/static/img/rive.png" alt="Rive">
                                         <span>Rive</span>
